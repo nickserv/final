@@ -1,7 +1,8 @@
+var http = require('http');
 var minimist = require('minimist');
 var url = require('url');
 
-module.exports = {
+var final = {
   createCommand: function (core) {
     return function () {
       var args = minimist(process.argv.slice(2));
@@ -23,5 +24,15 @@ module.exports = {
       res.writeHead(200);
       res.end(result);
     };
+  },
+
+  runCommand: function (core) {
+    final.createCommand(core)();
+  },
+
+  runServer: function (core) {
+    http.createServer(final.createServer(core)).listen(3000);
   }
 };
+
+module.exports = final;
