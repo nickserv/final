@@ -3,21 +3,19 @@ var minimist = require('minimist');
 var url = require('url');
 
 var final = {
-  createCommand: function (core) {
-    return function () {
+  createCommand: (core) => {
+    return () => {
       var args = minimist(process.argv.slice(2));
       delete args._;
-      Object.keys(args).forEach(function (key) {
-        args[key] = String(args[key]);
-      });
+      Object.keys(args).forEach((key) => args[key] = String(args[key]));
 
       var result = core(args);
       console.log(result);
     };
   },
 
-  createServer: function (core) {
-    return function (req, res) {
+  createServer: (core) => {
+    return (req, res) => {
       var args = url.parse(req.url, true).query;
       var result = core(args) + '\n';
 
@@ -26,11 +24,11 @@ var final = {
     };
   },
 
-  runCommand: function (core) {
+  runCommand: (core) => {
     final.createCommand(core)();
   },
 
-  runServer: function (core) {
+  runServer: (core) => {
     http.createServer(final.createServer(core)).listen(3000);
   }
 };

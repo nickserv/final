@@ -1,4 +1,4 @@
-module.exports = function (options) {
+module.exports = (options) => {
   var x = parseInt(options.x, 10);
   var y = parseInt(options.y, 10);
 
