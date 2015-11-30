@@ -9,6 +9,9 @@
   "dependencies": {
     "minimist": "^1.2.0"
   },
+  "devDependencies": {
+    "standard": "^5.4.1"
+  },
   "scripts": {
     "test": "standard"
   },
@@ -21,8 +24,5 @@
   "bugs": {
     "url": "https://github.com/nicolasmccurdy/final/issues"
   },
-  "homepage": "https://github.com/nicolasmccurdy/final#readme",
-  "devDependencies": {
-    "standard": "^5.4.1"
-  }
+  "homepage": "https://github.com/nicolasmccurdy/final#readme"
 }
