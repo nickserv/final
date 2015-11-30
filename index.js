@@ -1,20 +1,10 @@
+'use strict'
 var http = require('http')
 var minimist = require('minimist')
 var url = require('url')
 
 var final = {
-  createCommand: (core) => {
-    return () => {
-      var args = minimist(process.argv.slice(2))
-      delete args._
-      Object.keys(args).forEach((key) => args[key] = String(args[key]))
-
-      var result = core(args)
-      console.log(result)
-    }
-  },
-
-  createServer: (core) => {
+  createServer (core) {
     return (req, res) => {
       var args = url.parse(req.url, true).query
       var result = core(args) + '\n'
@@ -24,12 +14,29 @@ var final = {
     }
   },
 
-  runCommand: (core) => {
-    final.createCommand(core)()
-  },
-
-  runServer: (core) => {
+  runServer (core) {
     http.createServer(final.createServer(core)).listen(3000)
+  }
+}
+
+final.CLI = class CLI {
+  constructor (core) {
+    this.core = core
+  }
+
+  command () {
+    return () => {
+      var args = minimist(process.argv.slice(2))
+      delete args._
+      Object.keys(args).forEach(key => args[key] = String(args[key]))
+
+      var result = this.core(args)
+      console.log(result)
+    }
+  }
+
+  run () {
+    this.command()()
   }
 }
 
