@@ -15,12 +15,6 @@ describe('final.CLI', () => {
     })
   })
 
-  describe('#command()', () => {
-    it('returns a function', () => {
-      assert(cli.command() instanceof Function)
-    })
-  })
-
   describe('#run()', () => {
     it('runs a cli for the given core', sinon.test(function () {
       this.stub(console, 'log')

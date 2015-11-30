@@ -24,19 +24,13 @@ final.CLI = class CLI {
     this.core = core
   }
 
-  command () {
-    return () => {
-      var args = minimist(process.argv.slice(2))
-      delete args._
-      Object.keys(args).forEach(key => args[key] = String(args[key]))
-
-      var result = this.core(args)
-      console.log(result)
-    }
-  }
-
   run () {
-    this.command()()
+    var args = minimist(process.argv.slice(2))
+    delete args._
+    Object.keys(args).forEach(key => args[key] = String(args[key]))
+
+    var result = this.core(args)
+    console.log(result)
   }
 }
 
