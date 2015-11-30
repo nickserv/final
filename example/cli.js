@@ -1,4 +1,4 @@
-var add = require('./add');
-var final = require('..');
+var add = require('./add')
+var final = require('..')
 
-final.runCommand(add);
+final.runCommand(add)

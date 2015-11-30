@@ -9,6 +9,12 @@
   "dependencies": {
     "minimist": "^1.2.0"
   },
+  "devDependencies": {
+    "standard": "^5.4.1"
+  },
+  "scripts": {
+    "test": "standard"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nicolasmccurdy/final.git"
