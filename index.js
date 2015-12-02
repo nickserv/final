@@ -3,21 +3,7 @@ var http = require('http')
 var minimist = require('minimist')
 var url = require('url')
 
-var final = {
-  createServer (core) {
-    return (req, res) => {
-      var args = url.parse(req.url, true).query
-      var result = core(args) + '\n'
-
-      res.writeHead(200)
-      res.end(result)
-    }
-  },
-
-  runServer (core) {
-    http.createServer(final.createServer(core)).listen(3000)
-  }
-}
+var final = {}
 
 final.CLI = class CLI {
   constructor (core) {
@@ -31,6 +17,29 @@ final.CLI = class CLI {
 
     var result = this.core(args)
     console.log(result)
+  }
+}
+
+final.Server = class Server {
+  constructor (core) {
+    this.core = core
+    this.callback = (req, res) => {
+      var args = url.parse(req.url, true).query
+      var result = core(args) + '\n'
+
+      res.setHeader('content-type', 'text/plain')
+      res.writeHead(200)
+      res.end(result)
+    }
+    this.server = http.createServer(this.callback)
+  }
+
+  close () {
+    this.server.close()
+  }
+
+  run () {
+    this.server.listen(3000)
   }
 }
 
