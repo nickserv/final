@@ -3,9 +3,7 @@ var http = require('http')
 var minimist = require('minimist')
 var url = require('url')
 
-var final = {}
-
-final.CLI = class CLI {
+class CLI {
   constructor (core) {
     this.core = core
   }
@@ -20,18 +18,20 @@ final.CLI = class CLI {
   }
 }
 
-final.Server = class Server {
+class Server {
   constructor (core) {
     this.core = core
-    this.callback = (req, res) => {
-      var args = url.parse(req.url, true).query
-      var result = core(args) + '\n'
+    this.server = http.createServer(this.callback.bind(this))
+  }
 
-      res.setHeader('content-type', 'text/plain')
-      res.writeHead(200)
-      res.end(result)
-    }
-    this.server = http.createServer(this.callback)
+  callback (req, res) {
+    var args = url.parse(req.url, true).query
+    var result = `${this.core(args)}\n`
+
+    res.setHeader('content-type', 'text/plain')
+
+    res.writeHead(200)
+    res.end(result)
   }
 
   close () {
@@ -43,4 +43,4 @@ final.Server = class Server {
   }
 }
 
-module.exports = final
+module.exports = { CLI, Server }
