@@ -1,7 +1,4 @@
-/* global beforeEach, describe, it */
-var add = require('./support/add')
-var assert = require('assert')
-var final = require('..')
+require('./helper')
 var sinon = require('sinon')
 
 describe('final.CLI', () => {

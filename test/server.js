@@ -1,7 +1,4 @@
-/* global afterEach, beforeEach, describe, it */
-var add = require('./support/add')
-var assert = require('assert')
-var final = require('..')
+require('./helper')
 var http = require('http')
 
 describe('final.Server', () => {

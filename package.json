@@ -17,6 +17,17 @@
   "scripts": {
     "test": "standard && mocha"
   },
+  "standard": {
+    "globals": [
+      "add",
+      "afterEach",
+      "assert",
+      "beforeEach",
+      "describe",
+      "final",
+      "it"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nicolasmccurdy/final.git"
