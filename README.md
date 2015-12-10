@@ -26,7 +26,7 @@ console.log(result)
 Final can generate callbacks for Node's `http.Server` class, allowing you to run web servers wrapping functions and even embedding functions in larger Node web apps.
 ```javascript
 var final = require('final')
-final.runServer(add)
+new final.Server(add).run()
 ```
 Here, Final starts a web server at `localhost:3000` that wraps your function. You can call the function with HTTP requests like `GET localhost:3000?x=1&y=2`, and you will get a plain text response with the result.
 
@@ -35,7 +35,7 @@ Final also has a helper for creating command line interfaces around your
 function.
 ```javascript
 var final = require('final')
-final.runCommand(add)
+new final.CLI(add).run()
 ```
 Final will read arguments from the command running this JavaScript code, and
 then it will immediately run the function with the given options and print the
