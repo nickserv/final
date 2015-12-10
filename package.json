@@ -34,5 +34,13 @@
   "bugs": {
     "url": "https://github.com/nicolasmccurdy/final/issues"
   },
-  "homepage": "https://github.com/nicolasmccurdy/final#readme"
+  "homepage": "https://github.com/nicolasmccurdy/final#readme",
+  "keywords": [
+    "api",
+    "cli",
+    "command",
+    "framework",
+    "utility",
+    "web"
+  ]
 }
