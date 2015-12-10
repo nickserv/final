@@ -4,10 +4,10 @@ var http = require('http')
 var sinon = require('sinon')
 
 var add = function (options) {
-  var x = parseInt(options.x, 10)
-  var y = parseInt(options.y, 10)
+  var first = parseInt(options.first, 10)
+  var second = parseInt(options.second, 10)
 
-  return x + y
+  return first + second
 }
 
 describe('final', () => {
@@ -25,7 +25,7 @@ describe('final', () => {
     describe('#run()', () => {
       it('runs a cli for the given core', sinon.test(function () {
         this.stub(console, 'log')
-        process.argv = 'node cli.js -x 1 -y 2'.split(' ')
+        process.argv = 'node cli.js --first 1 --second 2'.split(' ')
         cli.run()
 
         sinon.assert.calledOnce(console.log)
@@ -70,7 +70,7 @@ describe('final', () => {
       it('runs a Server for the given core', (done) => {
         server.run()
 
-        http.get('http://localhost:3000?x=1&y=2', res => {
+        http.get('http://localhost:3000?first=1&second=2', res => {
           assert.equal(res.statusCode, 200)
           assert.equal(res.headers['content-type'], 'text/plain')
 
