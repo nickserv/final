@@ -22,12 +22,9 @@
   },
   "standard": {
     "globals": [
-      "add",
       "afterEach",
-      "assert",
       "beforeEach",
       "describe",
-      "final",
       "it"
     ]
   },

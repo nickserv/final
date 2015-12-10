@@ -1,6 +1,14 @@
-require('./helper')
+var assert = require('assert')
+var final = require('..')
 var http = require('http')
 var sinon = require('sinon')
+
+var add = function (options) {
+  var x = parseInt(options.x, 10)
+  var y = parseInt(options.y, 10)
+
+  return x + y
+}
 
 describe('final', () => {
   describe('CLI', () => {
