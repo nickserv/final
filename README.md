@@ -6,6 +6,9 @@
 
 A set of tools for writing JavaScript code once that runs on the command line, browser, and more.
 
+## Project Status
+Final is in early (pre-1.0) development. It is usable, but its API may change frequently until it reaches 1.0. Additionally, several core features (and runners) have not been implemented yet.
+
 ## Examples
 The examples below can be run in a Node.js script or shell.
 
