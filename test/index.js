@@ -1,28 +1,41 @@
+'use strict'
 var assert = require('assert')
 var final = require('..')
 var http = require('http')
 var sinon = require('sinon')
 
-var add = function (options) {
-  var first = parseInt(options.first, 10)
-  var second = parseInt(options.second, 10)
+class Adder extends final.Command {
+  core (options) {
+    var first = parseInt(options.first, 10)
+    var second = parseInt(options.second, 10)
 
-  return first + second
+    return first + second
+  }
 }
 
 describe('final', () => {
+  var command = new Adder()
+
+  describe('Command', () => {
+    describe('#run()', () => {
+      it('returns a result', () => {
+        assert.strictEqual(new Adder().run({ first: '1', second: '2' }), 3)
+      })
+    })
+  })
+
   describe('Runner', () => {
-    var runner = new final.Runner(add)
+    var runner = new final.Runner(command)
 
     describe('constructor', () => {
-      it('creates a new Runner with the given core', () => {
-        assert.strictEqual(runner.core, add)
+      it('creates a new Runner with the given command', () => {
+        assert.strictEqual(runner.command, command)
       })
     })
   })
 
   describe('CLI', () => {
-    var cli = new final.CLI(add)
+    var cli = new final.CLI(command)
 
     process.argv = 'node cli.js --first 1 --second 2'.split(' ')
 
@@ -33,7 +46,7 @@ describe('final', () => {
     })
 
     describe('#run()', () => {
-      it('runs a cli for the given core', sinon.test(function () {
+      it('runs a cli for the given command', sinon.test(function () {
         this.stub(console, 'log')
         cli.run()
 
@@ -47,9 +60,7 @@ describe('final', () => {
     var req = { url: 'http://localhost:3000?first=1&second=2' }
 
     var server
-
-    beforeEach(() => server = new final.Server(add))
-
+    beforeEach(() => server = new final.Server(command))
     afterEach(() => server.close())
 
     describe('constructor', () => {
@@ -80,7 +91,7 @@ describe('final', () => {
     })
 
     describe('#run()', () => {
-      it('runs a Server for the given core', (done) => {
+      it('runs a Server for the given command', (done) => {
         server.run()
 
         http.get(req.url, res => {

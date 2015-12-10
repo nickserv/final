@@ -3,28 +3,36 @@ var http = require('http')
 var minimist = require('minimist')
 var url = require('url')
 
+class Command {
+  run (options) {
+    return this.core(options)
+  }
+}
+
 class Runner {
-  constructor (core) {
-    this.core = core
+  constructor (command) {
+    this.command = command
   }
 }
 
 class CLI extends Runner {
   options () {
     var args = minimist(process.argv.slice(2))
-    delete args._
-    Object.keys(args).forEach(key => args[key] = String(args[key]))
-    return args
+
+    return Object.keys(args).reduce((memo, key) => {
+      if (key !== '_') memo[key] = String(args[key])
+      return memo
+    }, {})
   }
 
   run () {
-    console.log(this.core(this.options()))
+    console.log(this.command.run(this.options()))
   }
 }
 
 class Server extends Runner {
-  constructor (core) {
-    super(core)
+  constructor (command) {
+    super(command)
     this.server = http.createServer(this.callback.bind(this))
   }
 
@@ -35,7 +43,7 @@ class Server extends Runner {
   callback (req, res) {
     res.setHeader('content-type', 'text/plain')
     res.writeHead(200)
-    res.end(`${this.core(this.options(req))}\n`)
+    res.end(`${this.command.run(this.options(req))}\n`)
   }
 
   close () {
@@ -47,4 +55,4 @@ class Server extends Runner {
   }
 }
 
-module.exports = { Runner, CLI, Server }
+module.exports = { Command, Runner, CLI, Server }
