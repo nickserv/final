@@ -17,14 +17,6 @@
     "lint": "standard",
     "test": "npm run cover && npm run lint"
   },
-  "standard": {
-    "globals": [
-      "afterEach",
-      "beforeEach",
-      "describe",
-      "it"
-    ]
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nicolasmccurdy/final.git"
@@ -42,5 +34,13 @@
     "framework",
     "utility",
     "web"
-  ]
+  ],
+  "standard": {
+    "globals": [
+      "afterEach",
+      "beforeEach",
+      "describe",
+      "it"
+    ]
+  }
 }
