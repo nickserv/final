@@ -44,3 +44,6 @@ Final will read arguments from the command running this JavaScript code, and
 then it will immediately run the function with the given options and print the
 result to STDOUT. For example, try putting this in `add.js` and running
 `node add --first 1 --second 2` in the same directory.
+
+## License
+[ISC](LICENSE) (it's similar to MIT, but simpler)
