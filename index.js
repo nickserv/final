@@ -3,11 +3,13 @@ var http = require('http')
 var minimist = require('minimist')
 var url = require('url')
 
-class CLI {
+class Runner {
   constructor (core) {
     this.core = core
   }
+}
 
+class CLI extends Runner {
   run () {
     var args = minimist(process.argv.slice(2))
     delete args._
@@ -18,9 +20,9 @@ class CLI {
   }
 }
 
-class Server {
+class Server extends Runner {
   constructor (core) {
-    this.core = core
+    super(core)
     this.server = http.createServer(this.callback.bind(this))
   }
 
@@ -43,4 +45,4 @@ class Server {
   }
 }
 
-module.exports = { CLI, Server }
+module.exports = { Runner, CLI, Server }

@@ -11,16 +11,22 @@ var add = function (options) {
 }
 
 describe('final', () => {
+  describe('Runner', () => {
+    var runner
+
+    beforeEach(() => runner = new final.Runner(add))
+
+    describe('constructor', () => {
+      it('creates a new Runner with the given core', () => {
+        assert.equal(runner.core, add)
+      })
+    })
+  })
+
   describe('CLI', () => {
     var cli
 
     beforeEach(() => cli = new final.CLI(add))
-
-    describe('constructor', () => {
-      it('creates a new CLI with the given core', () => {
-        assert.equal(cli.core, add)
-      })
-    })
 
     describe('#run()', () => {
       it('runs a cli for the given core', sinon.test(function () {
@@ -42,10 +48,6 @@ describe('final', () => {
     afterEach(() => server.close())
 
     describe('constructor', () => {
-      it('creates a new Server with the given core', () => {
-        assert.equal(server.core, add)
-      })
-
       it('creates a new Server with a callback', () => {
         assert(server.callback instanceof Function)
         assert.equal(server.callback.length, 2)
