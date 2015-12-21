@@ -29,13 +29,20 @@ describe('final', () => {
 
   describe('Command', () => {
     describe('#run()', () => {
-      it('returns a result', () => {
-        assert.strictEqual(command.run({ first: 1, second: 2 }), '3')
+      context('with valid options', () => {
+        it('returns a result', () => {
+          assert.strictEqual(new Adder().run({ first: '1', second: '2' }), '3')
+        })
+      })
+
+      context('with invalid options', () => {
+        it('throws an error', () => {
+          assert.throws(() => new Adder().run({ invalid: '1', second: '2' }),
+                        final.ValidationError)
+        })
       })
     })
-  })
 
-  describe('Command', () => {
     describe('#validate()', () => {
       context('without any required options', () => {
         it('returns true', () => {
@@ -46,13 +53,13 @@ describe('final', () => {
 
       context('with valid options', () => {
         it('returns true', () => {
-          assert.strictEqual(new Adder().validate(['first', 'second']), true)
+          assert.strictEqual(command.validate(Object.keys({ first: '1', second: '2' })), true)
         })
       })
 
       context('with invalid options', () => {
         it('returns false', () => {
-          assert.strictEqual(new Adder().validate(['invalid', 'second']), false)
+          assert.strictEqual(command.validate(Object.keys({ invalid: '1', second: '2' })), false)
         })
       })
     })

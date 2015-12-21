@@ -3,8 +3,14 @@ var http = require('http')
 var minimist = require('minimist')
 var url = require('url')
 
+class ValidationError extends Error {
+}
+
 class Command {
   run (options) {
+    var optionNames = Object.keys(options)
+    if (!this.validate(optionNames)) throw new ValidationError()
+
     return String(this.core(this.convertOptions(options)))
   }
 
@@ -17,11 +23,9 @@ class Command {
 
   validate (optionNames) {
     if (Array.isArray(this.requiredOptions)) {
-      for (var optionName of optionNames) {
-        if (this.requiredOptions.indexOf(optionName) === -1) return false
-      }
-
-      return true
+      return optionNames.every(optionName =>
+        this.requiredOptions.indexOf(optionName) > -1
+      )
     } else {
       return true
     }
@@ -73,4 +77,4 @@ class Server extends Runner {
   }
 }
 
-module.exports = { Command, Runner, CLI, Server }
+module.exports = { ValidationError, Command, Runner, CLI, Server }
