@@ -14,6 +14,18 @@ class Command {
       return memo
     }, {})
   }
+
+  validate (optionNames) {
+    if (Array.isArray(this.requiredOptions)) {
+      for (var optionName of optionNames) {
+        if (this.requiredOptions.indexOf(optionName) === -1) return false
+      }
+
+      return true
+    } else {
+      return true
+    }
+  }
 }
 
 class Runner {

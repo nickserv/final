@@ -5,11 +5,22 @@ var http = require('http')
 var sinon = require('sinon')
 
 class Adder extends final.Command {
+  constructor () {
+    super()
+    this.requiredOptions = ['first', 'second']
+  }
+
   core (options) {
     var first = parseInt(options.first, 10)
     var second = parseInt(options.second, 10)
 
     return first + second
+  }
+}
+
+class Greeter extends final.Command {
+  core () {
+    return 'Hello, world!'
   }
 }
 
@@ -20,6 +31,29 @@ describe('final', () => {
     describe('#run()', () => {
       it('returns a result', () => {
         assert.strictEqual(command.run({ first: 1, second: 2 }), '3')
+      })
+    })
+  })
+
+  describe('Command', () => {
+    describe('#validate()', () => {
+      context('without any required options', () => {
+        it('returns true', () => {
+          var command = new Greeter()
+          assert.equal(command.validate(Object.keys([])), true)
+        })
+      })
+
+      context('with valid options', () => {
+        it('returns true', () => {
+          assert.strictEqual(new Adder().validate(['first', 'second']), true)
+        })
+      })
+
+      context('with invalid options', () => {
+        it('returns false', () => {
+          assert.strictEqual(new Adder().validate(['invalid', 'second']), false)
+        })
       })
     })
   })
