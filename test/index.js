@@ -12,9 +12,7 @@ var add = function (options) {
 
 describe('final', () => {
   describe('Runner', () => {
-    var runner
-
-    beforeEach(() => runner = new final.Runner(add))
+    var runner = new final.Runner(add)
 
     describe('constructor', () => {
       it('creates a new Runner with the given core', () => {
@@ -24,13 +22,12 @@ describe('final', () => {
   })
 
   describe('CLI', () => {
-    var cli
+    var cli = new final.CLI(add)
 
-    beforeEach(() => cli = new final.CLI(add))
+    process.argv = 'node cli.js --first 1 --second 2'.split(' ')
 
     describe('#options()', () => {
       it('returns args from argv', () => {
-        process.argv = 'node cli.js --first 1 --second 2'.split(' ')
         assert.deepEqual(cli.options(), { first: '1', second: '2' })
       })
     })
@@ -38,7 +35,6 @@ describe('final', () => {
     describe('#run()', () => {
       it('runs a cli for the given core', sinon.test(function () {
         this.stub(console, 'log')
-        process.argv = 'node cli.js --first 1 --second 2'.split(' ')
         cli.run()
 
         sinon.assert.calledOnce(console.log)
@@ -48,6 +44,8 @@ describe('final', () => {
   })
 
   describe('Server', () => {
+    var req = { url: 'http://localhost:3000?first=1&second=2' }
+
     var server
 
     beforeEach(() => server = new final.Server(add))
@@ -69,15 +67,14 @@ describe('final', () => {
       it('closes the Server', (done) => {
         server.close()
 
-        http.get('http://localhost:3000', res => {
+        http.get('http://localhost:3000', res =>
           done('Error: Server should be closed')
-        }).on('error', () => done())
+        ).on('error', () => done())
       })
     })
 
     describe('#options()', () => {
       it('returns options from the given request', () => {
-        var req = { url: '/?first=1&second=2' }
         assert.deepEqual(server.options(req), { first: '1', second: '2' })
       })
     })
@@ -86,7 +83,7 @@ describe('final', () => {
       it('runs a Server for the given core', (done) => {
         server.run()
 
-        http.get('http://localhost:3000?first=1&second=2', res => {
+        http.get(req.url, res => {
           assert.equal(res.statusCode, 200)
           assert.equal(res.headers['content-type'], 'text/plain')
 
