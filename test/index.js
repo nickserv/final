@@ -28,6 +28,13 @@ describe('final', () => {
 
     beforeEach(() => cli = new final.CLI(add))
 
+    describe('#options()', () => {
+      it('returns args from argv', () => {
+        process.argv = 'node cli.js --first 1 --second 2'.split(' ')
+        assert.deepEqual(cli.options(), { first: '1', second: '2' })
+      })
+    })
+
     describe('#run()', () => {
       it('runs a cli for the given core', sinon.test(function () {
         this.stub(console, 'log')
@@ -65,6 +72,13 @@ describe('final', () => {
         http.get('http://localhost:3000', res => {
           done('Error: Server should be closed')
         }).on('error', () => done())
+      })
+    })
+
+    describe('#options()', () => {
+      it('returns options from the given request', () => {
+        var req = { url: '/?first=1&second=2' }
+        assert.deepEqual(server.options(req), { first: '1', second: '2' })
       })
     })
 
