@@ -28,39 +28,28 @@ describe('final', () => {
   var command = new Adder()
 
   describe('Command', () => {
-    describe('#run()', () => {
-      context('with valid options', () => {
-        it('returns a result', () => {
-          assert.strictEqual(new Adder().run({ first: '1', second: '2' }), '3')
-        })
-      })
+    var adder = command
+    var greeter = new Greeter()
 
-      context('with invalid options', () => {
-        it('throws an error', () => {
-          assert.throws(() => new Adder().run({ invalid: '1', second: '2' }),
-                        final.ValidationError)
-        })
+    describe('#run()', () => {
+      it('returns a result or throws an error if options are invalid', () => {
+        assert.strictEqual(adder.run({ first: 1, second: 2 }), '3')
+        assert.throws(() => adder.run({}), final.ValidationError)
+        assert.throws(() => adder.run({ first: 1 }), final.ValidationError)
+        assert.throws(() => adder.run({ invalid: 1 }), final.ValidationError)
+        assert.strictEqual(greeter.run({}), 'Hello, world!')
+        assert.strictEqual(greeter.run({ extra: 'option' }), 'Hello, world!')
       })
     })
 
     describe('#validate()', () => {
-      context('without any required options', () => {
-        it('returns true', () => {
-          var command = new Greeter()
-          assert.equal(command.validate(Object.keys([])), true)
-        })
-      })
-
-      context('with valid options', () => {
-        it('returns true', () => {
-          assert.strictEqual(command.validate(Object.keys({ first: '1', second: '2' })), true)
-        })
-      })
-
-      context('with invalid options', () => {
-        it('returns false', () => {
-          assert.strictEqual(command.validate(Object.keys({ invalid: '1', second: '2' })), false)
-        })
+      it('returns true if the options are valid', () => {
+        assert.strictEqual(adder.validate(['first', 'second']), true)
+        assert.strictEqual(adder.validate([]), false)
+        assert.strictEqual(adder.validate(['first']), false)
+        assert.strictEqual(adder.validate(['invalid']), false)
+        assert.strictEqual(greeter.validate([]), true)
+        assert.strictEqual(greeter.validate(['extra']), true)
       })
     })
   })

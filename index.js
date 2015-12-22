@@ -23,8 +23,8 @@ class Command {
 
   validate (optionNames) {
     if (Array.isArray(this.requiredOptions)) {
-      return optionNames.every(optionName =>
-        this.requiredOptions.indexOf(optionName) > -1
+      return this.requiredOptions.every(requiredOption =>
+        optionNames.indexOf(requiredOption) > -1
       )
     } else {
       return true
