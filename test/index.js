@@ -16,7 +16,7 @@ describe('final', () => {
 
     describe('constructor', () => {
       it('creates a new Runner with the given core', () => {
-        assert.equal(runner.core, add)
+        assert.strictEqual(runner.core, add)
       })
     })
   })
@@ -28,7 +28,7 @@ describe('final', () => {
 
     describe('#options()', () => {
       it('returns args from argv', () => {
-        assert.deepEqual(cli.options(), { first: '1', second: '2' })
+        assert.deepStrictEqual(cli.options(), { first: '1', second: '2' })
       })
     })
 
@@ -55,7 +55,7 @@ describe('final', () => {
     describe('constructor', () => {
       it('creates a new Server with a callback', () => {
         assert(server.callback instanceof Function)
-        assert.equal(server.callback.length, 2)
+        assert.strictEqual(server.callback.length, 2)
       })
 
       it('creates a new Server with a server', () => {
@@ -75,7 +75,7 @@ describe('final', () => {
 
     describe('#options()', () => {
       it('returns options from the given request', () => {
-        assert.deepEqual(server.options(req), { first: '1', second: '2' })
+        assert.deepStrictEqual(server.options(req), { first: '1', second: '2' })
       })
     })
 
@@ -84,11 +84,11 @@ describe('final', () => {
         server.run()
 
         http.get(req.url, res => {
-          assert.equal(res.statusCode, 200)
-          assert.equal(res.headers['content-type'], 'text/plain')
+          assert.strictEqual(res.statusCode, 200)
+          assert.strictEqual(res.headers['content-type'], 'text/plain')
 
           res.on('data', (chunk) => {
-            assert.equal(chunk.toString('utf8'), '3\n')
+            assert.strictEqual(chunk.toString('utf8'), '3\n')
             done()
           })
         }).on('error', done)
