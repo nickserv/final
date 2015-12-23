@@ -7,6 +7,10 @@ class ValidationError extends Error {
 }
 
 class Command {
+  isSubset (subset, superset) {
+    return subset.every(item => superset.indexOf(item) > -1)
+  }
+
   run (options) {
     var optionNames = Object.keys(options)
     if (!this.validate(optionNames)) throw new ValidationError()
@@ -22,13 +26,8 @@ class Command {
   }
 
   validate (optionNames) {
-    if (Array.isArray(this.requiredOptions)) {
-      return this.requiredOptions.every(requiredOption =>
-        optionNames.indexOf(requiredOption) > -1
-      )
-    } else {
-      return true
-    }
+    return !Array.isArray(this.requiredOptions) ||
+             this.isSubset(this.requiredOptions, optionNames)
   }
 }
 
