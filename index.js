@@ -26,8 +26,11 @@ class Command {
   }
 
   validate (optionNames) {
-    return !Array.isArray(this.requiredOptions) ||
-             this.isSubset(this.requiredOptions, optionNames)
+    var meetsRequiredOptions = !Array.isArray(this.requiredOptions) ||
+                                 this.isSubset(this.requiredOptions, optionNames)
+    var meetsAllowedOptions = !Array.isArray(this.allowedOptions) ||
+                                this.isSubset(optionNames, this.allowedOptions.concat(this.requiredOptions))
+    return meetsRequiredOptions && meetsAllowedOptions
   }
 }
 

@@ -24,12 +24,24 @@ class Greeter extends final.Command {
   }
 }
 
+class SuperGreeter extends final.Command {
+  constructor () {
+    super()
+    this.allowedOptions = ['name']
+  }
+
+  core (options) {
+    return `Hello, ${options.name || 'world'}!`
+  }
+}
+
 describe('final', () => {
   var command = new Adder()
 
   describe('Command', () => {
     var adder = command
     var greeter = new Greeter()
+    var superGreeter = new SuperGreeter()
 
     describe('#run()', () => {
       it('returns a result or throws an error if options are invalid', () => {
@@ -37,8 +49,14 @@ describe('final', () => {
         assert.throws(() => adder.run({}), final.ValidationError)
         assert.throws(() => adder.run({ first: 1 }), final.ValidationError)
         assert.throws(() => adder.run({ invalid: 1 }), final.ValidationError)
+
         assert.strictEqual(greeter.run({}), 'Hello, world!')
         assert.strictEqual(greeter.run({ extra: 'option' }), 'Hello, world!')
+
+        assert.strictEqual(superGreeter.run({}), 'Hello, world!')
+        assert.strictEqual(superGreeter.run({ name: 'dude' }), 'Hello, dude!')
+        assert.throws(() => superGreeter.run({ invalid: 'dude' }),
+                     final.ValidationError)
       })
     })
 
@@ -48,8 +66,13 @@ describe('final', () => {
         assert.strictEqual(adder.validate([]), false)
         assert.strictEqual(adder.validate(['first']), false)
         assert.strictEqual(adder.validate(['invalid']), false)
+
         assert.strictEqual(greeter.validate([]), true)
         assert.strictEqual(greeter.validate(['extra']), true)
+
+        assert.strictEqual(superGreeter.validate([]), true)
+        assert.strictEqual(superGreeter.validate(['name']), true)
+        assert.strictEqual(superGreeter.validate(['invalid']), false)
       })
     })
   })
