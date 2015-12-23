@@ -5,7 +5,14 @@ var url = require('url')
 
 class Command {
   run (options) {
-    return this.core(options)
+    return String(this.core(this.convertOptions(options)))
+  }
+
+  convertOptions (options) {
+    return Object.keys(options).reduce((memo, key) => {
+      memo[key] = String(options[key])
+      return memo
+    }, {})
   }
 }
 
@@ -19,10 +26,9 @@ class CLI extends Runner {
   options () {
     var args = minimist(process.argv.slice(2))
 
-    return Object.keys(args).reduce((memo, key) => {
-      if (key !== '_') memo[key] = String(args[key])
-      return memo
-    }, {})
+    var options = Object.assign({}, args)
+    delete options._
+    return Command.prototype.convertOptions(options)
   }
 
   run () {

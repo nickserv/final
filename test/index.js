@@ -19,7 +19,7 @@ describe('final', () => {
   describe('Command', () => {
     describe('#run()', () => {
       it('returns a result', () => {
-        assert.strictEqual(new Adder().run({ first: '1', second: '2' }), 3)
+        assert.strictEqual(command.run({ first: 1, second: 2 }), '3')
       })
     })
   })
@@ -51,7 +51,7 @@ describe('final', () => {
         cli.run()
 
         sinon.assert.calledOnce(console.log)
-        sinon.assert.calledWithExactly(console.log, 3)
+        sinon.assert.calledWithExactly(console.log, '3')
       }))
     })
   })
