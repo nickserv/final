@@ -15,14 +15,14 @@ class API extends Runner {
     this.server = http.createServer(this.callback.bind(this))
   }
 
+  options (req) {
+    return url.parse(req.url, true).query
+  }
+
   callback (req, res) {
-    var args = url.parse(req.url, true).query
-    var result = `${this.core(args)}\n`
-
     res.setHeader('content-type', 'text/plain')
-
     res.writeHead(200)
-    res.end(result)
+    res.end(`${this.core(this.options(req))}\n`)
   }
 
   close () {
@@ -35,13 +35,15 @@ class API extends Runner {
 }
 
 class CLI extends Runner {
-  run () {
+  options () {
     var args = minimist(process.argv.slice(2))
     delete args._
     Object.keys(args).forEach(key => args[key] = String(args[key]))
+    return args
+  }
 
-    var result = this.core(args)
-    console.log(result)
+  run () {
+    console.log(this.core(this.options()))
   }
 }
 

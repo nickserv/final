@@ -12,18 +12,18 @@ var add = function (options) {
 
 describe('final', () => {
   describe('Runner', () => {
-    var runner
-
-    beforeEach(() => runner = new final.Runner(add))
+    var runner = new final.Runner(add)
 
     describe('constructor', () => {
       it('creates a new Runner with the given core', () => {
-        assert.equal(runner.core, add)
+        assert.strictEqual(runner.core, add)
       })
     })
   })
 
   describe('API', () => {
+    var req = { url: 'http://localhost:3000?first=1&second=2' }
+
     var api
 
     beforeEach(() => api = new final.API(add))
@@ -33,7 +33,7 @@ describe('final', () => {
     describe('constructor', () => {
       it('creates a new API with a callback', () => {
         assert(api.callback instanceof Function)
-        assert.equal(api.callback.length, 2)
+        assert.strictEqual(api.callback.length, 2)
       })
 
       it('creates a new API with a server', () => {
@@ -45,9 +45,15 @@ describe('final', () => {
       it('closes the API server', (done) => {
         api.close()
 
-        http.get('http://localhost:3000', res => {
+        http.get('http://localhost:3000', res =>
           done('Error: API server should be closed')
-        }).on('error', () => done())
+        ).on('error', () => done())
+      })
+    })
+
+    describe('#options()', () => {
+      it('returns options from the given request', () => {
+        assert.deepStrictEqual(api.options(req), { first: '1', second: '2' })
       })
     })
 
@@ -55,12 +61,12 @@ describe('final', () => {
       it('runs an API for the given core', (done) => {
         api.run()
 
-        http.get('http://localhost:3000?first=1&second=2', res => {
-          assert.equal(res.statusCode, 200)
-          assert.equal(res.headers['content-type'], 'text/plain')
+        http.get(req.url, res => {
+          assert.strictEqual(res.statusCode, 200)
+          assert.strictEqual(res.headers['content-type'], 'text/plain')
 
           res.on('data', (chunk) => {
-            assert.equal(chunk.toString('utf8'), '3\n')
+            assert.strictEqual(chunk.toString('utf8'), '3\n')
             done()
           })
         }).on('error', done)
@@ -69,14 +75,19 @@ describe('final', () => {
   })
 
   describe('CLI', () => {
-    var cli
+    var cli = new final.CLI(add)
 
-    beforeEach(() => cli = new final.CLI(add))
+    process.argv = 'node cli.js --first 1 --second 2'.split(' ')
+
+    describe('#options()', () => {
+      it('returns args from argv', () => {
+        assert.deepStrictEqual(cli.options(), { first: '1', second: '2' })
+      })
+    })
 
     describe('#run()', () => {
       it('runs a cli for the given core', sinon.test(function () {
         this.stub(console, 'log')
-        process.argv = 'node cli.js --first 1 --second 2'.split(' ')
         cli.run()
 
         sinon.assert.calledOnce(console.log)
