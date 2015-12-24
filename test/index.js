@@ -40,37 +40,37 @@ describe('final', () => {
     })
   })
 
-  describe('Server', () => {
-    var server
+  describe('API', () => {
+    var api
 
-    beforeEach(() => server = new final.Server(add))
+    beforeEach(() => api = new final.API(add))
 
-    afterEach(() => server.close())
+    afterEach(() => api.close())
 
     describe('constructor', () => {
-      it('creates a new Server with a callback', () => {
-        assert(server.callback instanceof Function)
-        assert.equal(server.callback.length, 2)
+      it('creates a new API with a callback', () => {
+        assert(api.callback instanceof Function)
+        assert.equal(api.callback.length, 2)
       })
 
-      it('creates a new Server with a server', () => {
-        assert(server.server instanceof http.Server)
+      it('creates a new API with a server', () => {
+        assert(api.server instanceof http.Server)
       })
     })
 
     describe('#close()', () => {
-      it('closes the Server', (done) => {
-        server.close()
+      it('closes the API server', (done) => {
+        api.close()
 
         http.get('http://localhost:3000', res => {
-          done('Error: Server should be closed')
+          done('Error: API server should be closed')
         }).on('error', () => done())
       })
     })
 
     describe('#run()', () => {
-      it('runs a Server for the given core', (done) => {
-        server.run()
+      it('runs an API for the given core', (done) => {
+        api.run()
 
         http.get('http://localhost:3000?first=1&second=2', res => {
           assert.equal(res.statusCode, 200)

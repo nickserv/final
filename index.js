@@ -20,7 +20,7 @@ class CLI extends Runner {
   }
 }
 
-class Server extends Runner {
+class API extends Runner {
   constructor (core) {
     super(core)
     this.server = http.createServer(this.callback.bind(this))
@@ -45,4 +45,4 @@ class Server extends Runner {
   }
 }
 
-module.exports = { Runner, CLI, Server }
+module.exports = { Runner, CLI, API }
