@@ -23,23 +23,6 @@ describe('final', () => {
     })
   })
 
-  describe('CLI', () => {
-    var cli
-
-    beforeEach(() => cli = new final.CLI(add))
-
-    describe('#run()', () => {
-      it('runs a cli for the given core', sinon.test(function () {
-        this.stub(console, 'log')
-        process.argv = 'node cli.js --first 1 --second 2'.split(' ')
-        cli.run()
-
-        sinon.assert.calledOnce(console.log)
-        sinon.assert.calledWithExactly(console.log, 3)
-      }))
-    })
-  })
-
   describe('API', () => {
     var api
 
@@ -82,6 +65,23 @@ describe('final', () => {
           })
         }).on('error', done)
       })
+    })
+  })
+
+  describe('CLI', () => {
+    var cli
+
+    beforeEach(() => cli = new final.CLI(add))
+
+    describe('#run()', () => {
+      it('runs a cli for the given core', sinon.test(function () {
+        this.stub(console, 'log')
+        process.argv = 'node cli.js --first 1 --second 2'.split(' ')
+        cli.run()
+
+        sinon.assert.calledOnce(console.log)
+        sinon.assert.calledWithExactly(console.log, 3)
+      }))
     })
   })
 })

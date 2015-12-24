@@ -9,17 +9,6 @@ class Runner {
   }
 }
 
-class CLI extends Runner {
-  run () {
-    var args = minimist(process.argv.slice(2))
-    delete args._
-    Object.keys(args).forEach(key => args[key] = String(args[key]))
-
-    var result = this.core(args)
-    console.log(result)
-  }
-}
-
 class API extends Runner {
   constructor (core) {
     super(core)
@@ -45,4 +34,15 @@ class API extends Runner {
   }
 }
 
-module.exports = { Runner, CLI, API }
+class CLI extends Runner {
+  run () {
+    var args = minimist(process.argv.slice(2))
+    delete args._
+    Object.keys(args).forEach(key => args[key] = String(args[key]))
+
+    var result = this.core(args)
+    console.log(result)
+  }
+}
+
+module.exports = { Runner, API, CLI }
