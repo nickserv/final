@@ -29,17 +29,16 @@ var result = add({ first: '1', second: '2' })
 console.log(result)
 ```
 
-### Generating Servers
-Final can generate callbacks for Node's `http.Server` class, allowing you to run web servers wrapping functions and even embedding functions in larger Node web apps.
+### Server Runner
+Final can generate callbacks for Node's `http.Server` class, allowing you to run web servers wrapping functions. You can also embed Final functions in larger Node web apps.
 ```javascript
 var final = require('final')
 new final.Server(add).run()
 ```
 Here, Final starts a web server at `localhost:3000` that wraps your function. You can call the function with HTTP requests like `GET localhost:3000?first=1&second=2`, and you will get a plain text response with the result.
 
-### Generating Commands
-Final also has a helper for creating command line interfaces around your
-function.
+### CLI Runner
+Final can create command line interfaces around your function.
 ```javascript
 var final = require('final')
 new final.CLI(add).run()
