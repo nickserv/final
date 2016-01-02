@@ -7,7 +7,7 @@ class ValidationError extends Error {
 }
 
 class Command {
-  isSubset (subset, superset) {
+  static isSubset (subset, superset) {
     return subset.every(item => superset.indexOf(item) > -1)
   }
 
@@ -27,9 +27,9 @@ class Command {
 
   validate (optionNames) {
     var meetsRequiredOptions = !Array.isArray(this.requiredOptions) ||
-                                 this.isSubset(this.requiredOptions, optionNames)
+                                 Command.isSubset(this.requiredOptions, optionNames)
     var meetsAllowedOptions = !Array.isArray(this.allowedOptions) ||
-                                this.isSubset(optionNames, this.allowedOptions.concat(this.requiredOptions))
+                                Command.isSubset(optionNames, this.allowedOptions.concat(this.requiredOptions))
     return meetsRequiredOptions && meetsAllowedOptions
   }
 }
