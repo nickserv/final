@@ -3,15 +3,28 @@ var http = require('http')
 var minimist = require('minimist')
 var url = require('url')
 
+class Command {
+  run (options) {
+    return String(this.core(this.convertOptions(options)))
+  }
+
+  convertOptions (options) {
+    return Object.keys(options).reduce((memo, key) => {
+      memo[key] = String(options[key])
+      return memo
+    }, {})
+  }
+}
+
 class Runner {
-  constructor (core) {
-    this.core = core
+  constructor (command) {
+    this.command = command
   }
 }
 
 class API extends Runner {
-  constructor (core) {
-    super(core)
+  constructor (command) {
+    super(command)
     this.server = http.createServer(this.callback.bind(this))
   }
 
@@ -22,7 +35,7 @@ class API extends Runner {
   callback (req, res) {
     res.setHeader('content-type', 'text/plain')
     res.writeHead(200)
-    res.end(`${this.core(this.options(req))}\n`)
+    res.end(`${this.command.run(this.options(req))}\n`)
   }
 
   close () {
@@ -37,14 +50,15 @@ class API extends Runner {
 class CLI extends Runner {
   options () {
     var args = minimist(process.argv.slice(2))
-    delete args._
-    Object.keys(args).forEach(key => args[key] = String(args[key]))
-    return args
+
+    var options = Object.assign({}, args)
+    delete options._
+    return Command.prototype.convertOptions(options)
   }
 
   run () {
-    console.log(this.core(this.options()))
+    console.log(this.command.run(this.options()))
   }
 }
 
-module.exports = { Runner, API, CLI }
+module.exports = { Command, Runner, API, CLI }
