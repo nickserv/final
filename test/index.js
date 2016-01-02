@@ -62,9 +62,9 @@ describe('final', () => {
       })
     })
 
-    describe('#options()', () => {
+    describe('.options()', () => {
       it('returns options from the given request', () => {
-        assert.deepStrictEqual(api.options(req), { first: '1', second: '2' })
+        assert.deepStrictEqual(final.API.options(req), { first: '1', second: '2' })
       })
     })
 
@@ -90,9 +90,9 @@ describe('final', () => {
 
     process.argv = 'node cli.js --first 1 --second 2'.split(' ')
 
-    describe('#options()', () => {
+    describe('.options()', () => {
       it('returns args from argv', () => {
-        assert.deepStrictEqual(cli.options(), { first: '1', second: '2' })
+        assert.deepStrictEqual(final.CLI.options(), { first: '1', second: '2' })
       })
     })
 

@@ -5,10 +5,10 @@ var url = require('url')
 
 class Command {
   run (options) {
-    return String(this.core(this.convertOptions(options)))
+    return String(this.core(Command.convertOptions(options)))
   }
 
-  convertOptions (options) {
+  static convertOptions (options) {
     return Object.keys(options).reduce((memo, key) => {
       memo[key] = String(options[key])
       return memo
@@ -28,14 +28,14 @@ class API extends Runner {
     this.server = http.createServer(this.callback.bind(this))
   }
 
-  options (req) {
+  static options (req) {
     return url.parse(req.url, true).query
   }
 
   callback (req, res) {
     res.setHeader('content-type', 'text/plain')
     res.writeHead(200)
-    res.end(`${this.command.run(this.options(req))}\n`)
+    res.end(`${this.command.run(API.options(req))}\n`)
   }
 
   close () {
@@ -48,16 +48,16 @@ class API extends Runner {
 }
 
 class CLI extends Runner {
-  options () {
+  static options () {
     var args = minimist(process.argv.slice(2))
 
     var options = Object.assign({}, args)
     delete options._
-    return Command.prototype.convertOptions(options)
+    return Command.convertOptions(options)
   }
 
   run () {
-    console.log(this.command.run(this.options()))
+    console.log(this.command.run(CLI.options()))
   }
 }
 
