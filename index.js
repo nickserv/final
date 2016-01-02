@@ -40,21 +40,7 @@ class Runner {
   }
 }
 
-class CLI extends Runner {
-  options () {
-    var args = minimist(process.argv.slice(2))
-
-    var options = Object.assign({}, args)
-    delete options._
-    return Command.prototype.convertOptions(options)
-  }
-
-  run () {
-    console.log(this.command.run(this.options()))
-  }
-}
-
-class Server extends Runner {
+class API extends Runner {
   constructor (command) {
     super(command)
     this.server = http.createServer(this.callback.bind(this))
@@ -79,4 +65,18 @@ class Server extends Runner {
   }
 }
 
-module.exports = { ValidationError, Command, Runner, CLI, Server }
+class CLI extends Runner {
+  options () {
+    var args = minimist(process.argv.slice(2))
+
+    var options = Object.assign({}, args)
+    delete options._
+    return Command.prototype.convertOptions(options)
+  }
+
+  run () {
+    console.log(this.command.run(this.options()))
+  }
+}
+
+module.exports = { ValidationError, Command, Runner, API, CLI }

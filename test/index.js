@@ -87,6 +87,57 @@ describe('final', () => {
     })
   })
 
+  describe('API', () => {
+    var req = { url: 'http://localhost:3000?first=1&second=2' }
+
+    var api
+    beforeEach(() => api = new final.API(command))
+    afterEach(() => api.close())
+
+    describe('constructor', () => {
+      it('creates a new API with a callback', () => {
+        assert(api.callback instanceof Function)
+        assert.strictEqual(api.callback.length, 2)
+      })
+
+      it('creates a new API with a server', () => {
+        assert(api.server instanceof http.Server)
+      })
+    })
+
+    describe('#close()', () => {
+      it('closes the API server', (done) => {
+        api.close()
+
+        http.get('http://localhost:3000', res =>
+          done('Error: API server should be closed')
+        ).on('error', () => done())
+      })
+    })
+
+    describe('#options()', () => {
+      it('returns options from the given request', () => {
+        assert.deepStrictEqual(api.options(req), { first: '1', second: '2' })
+      })
+    })
+
+    describe('#run()', () => {
+      it('runs an API for the given command', (done) => {
+        api.run()
+
+        http.get(req.url, res => {
+          assert.strictEqual(res.statusCode, 200)
+          assert.strictEqual(res.headers['content-type'], 'text/plain')
+
+          res.on('data', (chunk) => {
+            assert.strictEqual(chunk.toString('utf8'), '3\n')
+            done()
+          })
+        }).on('error', done)
+      })
+    })
+  })
+
   describe('CLI', () => {
     var cli = new final.CLI(command)
 
@@ -106,57 +157,6 @@ describe('final', () => {
         sinon.assert.calledOnce(console.log)
         sinon.assert.calledWithExactly(console.log, '3')
       }))
-    })
-  })
-
-  describe('Server', () => {
-    var req = { url: 'http://localhost:3000?first=1&second=2' }
-
-    var server
-    beforeEach(() => server = new final.Server(command))
-    afterEach(() => server.close())
-
-    describe('constructor', () => {
-      it('creates a new Server with a callback', () => {
-        assert(server.callback instanceof Function)
-        assert.strictEqual(server.callback.length, 2)
-      })
-
-      it('creates a new Server with a server', () => {
-        assert(server.server instanceof http.Server)
-      })
-    })
-
-    describe('#close()', () => {
-      it('closes the Server', (done) => {
-        server.close()
-
-        http.get('http://localhost:3000', res =>
-          done('Error: Server should be closed')
-        ).on('error', () => done())
-      })
-    })
-
-    describe('#options()', () => {
-      it('returns options from the given request', () => {
-        assert.deepStrictEqual(server.options(req), { first: '1', second: '2' })
-      })
-    })
-
-    describe('#run()', () => {
-      it('runs a Server for the given command', (done) => {
-        server.run()
-
-        http.get(req.url, res => {
-          assert.strictEqual(res.statusCode, 200)
-          assert.strictEqual(res.headers['content-type'], 'text/plain')
-
-          res.on('data', (chunk) => {
-            assert.strictEqual(chunk.toString('utf8'), '3\n')
-            done()
-          })
-        }).on('error', done)
-      })
     })
   })
 })
