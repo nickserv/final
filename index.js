@@ -4,15 +4,15 @@ var minimist = require('minimist')
 var url = require('url')
 
 class Command {
-  run (options) {
-    return String(this.core(Command.convertOptions(options)))
-  }
-
   static convertOptions (options) {
     return Object.keys(options).reduce((memo, key) => {
       memo[key] = String(options[key])
       return memo
     }, {})
+  }
+
+  run (options) {
+    return String(this.core(Command.convertOptions(options)))
   }
 }
 
@@ -28,10 +28,6 @@ class API extends Runner {
     this.server = http.createServer(this.callback.bind(this))
   }
 
-  static options (req) {
-    return url.parse(req.url, true).query
-  }
-
   callback (req, res) {
     res.setHeader('content-type', 'text/plain')
     res.writeHead(200)
@@ -40,6 +36,10 @@ class API extends Runner {
 
   close () {
     this.server.close()
+  }
+
+  static options (req) {
+    return url.parse(req.url, true).query
   }
 
   run () {
