@@ -17,8 +17,31 @@ describe('final', () => {
   var command = new Adder()
 
   describe('Command', () => {
+    describe('.convertOptions()', () => {
+      context('given empty options', () => {
+        it('leaves the option values alone', () => {
+          assert.deepStrictEqual(final.Command.convertOptions({}),
+                                 {})
+        })
+      })
+
+      context('given option values that are Strings', () => {
+        it('leaves the option values alone', () => {
+          assert.deepStrictEqual(final.Command.convertOptions({ first: '1', second: '2' }),
+                                 { first: '1', second: '2' })
+        })
+      })
+
+      context('given option values that are not Strings', () => {
+        it('converts the option values to Strings', () => {
+          assert.deepStrictEqual(final.Command.convertOptions({ first: 1, second: 2 }),
+                                 { first: '1', second: '2' })
+        })
+      })
+    })
+
     describe('#run()', () => {
-      it('returns a result', () => {
+      it('returns a String result', () => {
         assert.strictEqual(command.run({ first: 1, second: 2 }), '3')
       })
     })
@@ -42,14 +65,29 @@ describe('final', () => {
     afterEach(() => api.close())
 
     describe('constructor', () => {
-      it('creates a new API with a callback', () => {
+      it('creates a new API with a server', () => {
+        assert(api.server instanceof http.Server)
+      })
+    })
+
+    describe('#callback()', () => {
+      it('takes a request and a response', () => {
         assert(api.callback instanceof Function)
         assert.strictEqual(api.callback.length, 2)
       })
 
-      it('creates a new API with a server', () => {
-        assert(api.server instanceof http.Server)
-      })
+      it('gives an accurate response', sinon.test(function () {
+        var res = {
+          end: sinon.stub(),
+          setHeader: sinon.stub(),
+          writeHead: sinon.stub()
+        }
+
+        api.callback(req, res)
+
+        sinon.assert.calledOnce(res.end)
+        sinon.assert.calledWithExactly(res.end, '3\n')
+      }))
     })
 
     describe('#close()', () => {

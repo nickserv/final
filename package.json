@@ -42,6 +42,7 @@
     "globals": [
       "afterEach",
       "beforeEach",
+      "context",
       "describe",
       "it"
     ]
