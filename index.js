@@ -1,14 +1,12 @@
 'use strict'
+var _ = require('lodash')
 var http = require('http')
 var minimist = require('minimist')
 var url = require('url')
 
 class Command {
   static convertOptions (options) {
-    return Object.keys(options).reduce((memo, key) => {
-      memo[key] = String(options[key])
-      return memo
-    }, {})
+    return _.mapValues(options, String)
   }
 
   run (options) {
@@ -50,9 +48,7 @@ class API extends Runner {
 class CLI extends Runner {
   static options () {
     var args = minimist(process.argv.slice(2))
-
-    var options = Object.assign({}, args)
-    delete options._
+    var options = _.omit(args, '_')
     return Command.convertOptions(options)
   }
 

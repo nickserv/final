@@ -1,4 +1,5 @@
 'use strict'
+var _ = require('lodash')
 var assert = require('assert')
 var final = require('..')
 var http = require('http')
@@ -6,8 +7,8 @@ var sinon = require('sinon')
 
 class Adder extends final.Command {
   core (options) {
-    var first = parseInt(options.first, 10)
-    var second = parseInt(options.second, 10)
+    var first = _.parseInt(options.first)
+    var second = _.parseInt(options.second)
 
     return first + second
   }
