@@ -5,6 +5,10 @@ var minimist = require('minimist')
 var url = require('url')
 
 class Command {
+  constructor (core) {
+    this.core = core
+  }
+
   static convertOptions (options) {
     return _.mapValues(options, String)
   }

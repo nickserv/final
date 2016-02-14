@@ -14,18 +14,16 @@ Final is in early (pre-1.0) development. It is usable, but its API may change fr
 The examples below can be run in a Node.js script or shell.
 
 ### Getting Started
-First, create a subclass of `Command` and implement the `core()` method. Skip to the Usage section for more information about how to write `Command`s.
+First, create an instance of `Command` with a function implementing the `Command`'s core. Skip to the Usage section for more information about how to write `Command`s.
 ```javascript
-class Adder extends final.Command {
-  core (options) {
-    var first = parseInt(options.first, 10)
-    var second = parseInt(options.second, 10)
+var adder = new final.Command(options => {
+  var first = parseInt(options.first, 10)
+  var second = parseInt(options.second, 10)
 
-    return first + second
-  }
-}
+  return first + second
+})
 ```
-This `Command` exposes a `run()` method wraps the `core()` with some extra type conversion and validation. This is the recommended way of running `Command`s. Note that your `core()` method should treat all options as `String`s, since all inputs and outputs are converted to and from `String`s by the `run()` method.
+This `Command` exposes a `run()` method which wraps the given core with some extra type conversion and validation. This is the recommended way of running `Command`s. Note that your core function should treat all options as `String`s, since all inputs and outputs are converted to and from `String`s by the `run()` method.
 ```javascript
 var command = new Adder()
 var result = command.run({ first: 1, second: 2 }) // this returns a String

@@ -5,19 +5,23 @@ var final = require('..')
 var http = require('http')
 var sinon = require('sinon')
 
-class Adder extends final.Command {
-  core (options) {
+describe('final', () => {
+  var core = options => {
     var first = _.parseInt(options.first)
     var second = _.parseInt(options.second)
 
     return first + second
   }
-}
 
-describe('final', () => {
-  var command = new Adder()
+  var command = new final.Command(core)
 
   describe('Command', () => {
+    describe('constructor', () => {
+      it('creates a new Command with the given core', () => {
+        assert.strictEqual(command.core, core)
+      })
+    })
+
     describe('.convertOptions()', () => {
       context('given empty options', () => {
         it('leaves the option values alone', () => {
