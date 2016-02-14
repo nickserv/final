@@ -1,4 +1,4 @@
-/* global Command, command, commandCore, commandOptions, Runner */
+/* global Command, Runner, command, commandCore, commandOptions, group */
 describe('Runner', () => {
   describe('constructor', () => {
     context('given a command', () => {
@@ -20,6 +20,22 @@ describe('Runner', () => {
         var runner = new Runner(commandCore, commandOptions)
         runner.command.should.deep.equal(command)
       })
+    })
+
+    context('given a group', () => {
+      it('uses the given group', () => {
+        new Runner(group).command.should.equal(group)
+      })
+    })
+  })
+
+  describe('#run()', () => {
+    context('using a Command', () => {
+      it('calls #runCommand()')
+    })
+
+    context('using a CommandGroup', () => {
+      it('calls #runGroup()')
     })
   })
 })

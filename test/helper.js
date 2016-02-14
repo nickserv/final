@@ -1,4 +1,4 @@
-/* global Command */
+/* global Command, CommandGroup */
 var _ = require('lodash')
 var chai = require('chai')
 var final = require('..')
@@ -28,3 +28,9 @@ global.erroringCommand = new Command(() => { throw new Error() })
 
 global.options = { first: 1, second: 2 }
 global.stringOptions = _.mapValues(global.options, String)
+
+global.greeting = 'Hello, world!'
+global.simpleCommandCore = () => global.greeting
+global.simpleCommand = new Command(global.simpleCommandCore)
+
+global.group = new CommandGroup({ add: global.command, greet: global.simpleCommand })
