@@ -138,6 +138,58 @@ describe('final', () => {
     })
   })
 
+  describe('App', () => {
+    var indexURL = 'http://localhost:3000/'
+    var resultURL = indexURL + 'result?first=1&second=2'
+
+    var app
+    beforeEach(() => app = new final.App(command))
+    afterEach(() => app.close())
+
+    describe('constructor', () => {
+      it('creates a app with a server', () => {
+        assert(app.server instanceof http.Server)
+      })
+    })
+
+    describe('#close()', () => {
+      it('closes the app server', (done) => {
+        app.close()
+
+        http.get(indexURL, res =>
+          done('Error: App server should be closed')
+        ).on('error', () => done())
+      })
+    })
+
+    describe('#createApp()', () => {
+      it('returns a new Express app', () => {
+        assert(app.createApp() instanceof Function)
+      })
+    })
+
+    describe('#run()', () => {
+      it('runs an app for the given command', (done) => {
+        app.run()
+
+        http.get(indexURL, res => {
+          assert.strictEqual(res.statusCode, 200)
+          assert(res.headers['content-type'].includes('text/html'))
+        }).on('error', done)
+
+        http.get(resultURL, res => {
+          assert.strictEqual(res.statusCode, 200)
+          assert(res.headers['content-type'].includes('text/html'))
+
+          res.on('data', (chunk) => {
+            assert(chunk.toString('utf8').includes(3))
+            done()
+          })
+        }).on('error', done)
+      })
+    })
+  })
+
   describe('CLI', () => {
     var cli = new final.CLI(command)
 
