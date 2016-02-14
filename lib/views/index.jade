@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h1= title
+  h2 Input
+  form(action="/result")
+    ul
+      each option in requiredOptions
+        li
+          label
+            = option
+            input(name=option)
+    input(type="submit")
