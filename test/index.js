@@ -29,12 +29,26 @@ describe('final', () => {
     })
   })
 
+  describe('CommandGroup', () => {
+    it('has tests')
+  })
+
   describe('Runner', () => {
     var runner = new final.Runner(command)
 
     describe('constructor', () => {
       it('creates a new Runner with the given command', () => {
         assert.strictEqual(runner.command, command)
+      })
+    })
+
+    describe('#run()', () => {
+      context('using a Command', () => {
+        it('calls #runCommand()')
+      })
+
+      context('using a CommandGroup', () => {
+        it('calls #runGroup()')
       })
     })
   })
@@ -116,10 +130,10 @@ describe('final', () => {
       })
     })
 
-    describe('#run()', () => {
+    describe('#runCommand()', () => {
       it('runs a cli for the given command', sinon.test(function () {
         this.stub(console, 'log')
-        cli.run()
+        cli.runCommand()
 
         sinon.assert.calledOnce(console.log)
         sinon.assert.calledWithExactly(console.log, '3')
