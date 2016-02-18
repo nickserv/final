@@ -1,4 +1,5 @@
 'use strict'
+var _ = require('lodash')
 var assert = require('assert')
 var final = require('..')
 var http = require('http')
@@ -11,8 +12,8 @@ class Adder extends final.Command {
   }
 
   core (options) {
-    var first = parseInt(options.first, 10)
-    var second = parseInt(options.second, 10)
+    var first = _.parseInt(options.first)
+    var second = _.parseInt(options.second)
 
     return first + second
   }
@@ -95,14 +96,29 @@ describe('final', () => {
     afterEach(() => api.close())
 
     describe('constructor', () => {
-      it('creates a new API with a callback', () => {
+      it('creates a new API with a server', () => {
+        assert(api.server instanceof http.Server)
+      })
+    })
+
+    describe('#callback()', () => {
+      it('takes a request and a response', () => {
         assert(api.callback instanceof Function)
         assert.strictEqual(api.callback.length, 2)
       })
 
-      it('creates a new API with a server', () => {
-        assert(api.server instanceof http.Server)
-      })
+      it('gives an accurate response', sinon.test(function () {
+        var res = {
+          end: sinon.stub(),
+          setHeader: sinon.stub(),
+          writeHead: sinon.stub()
+        }
+
+        api.callback(req, res)
+
+        sinon.assert.calledOnce(res.end)
+        sinon.assert.calledWithExactly(res.end, '3\n')
+      }))
     })
 
     describe('#close()', () => {
@@ -197,7 +213,7 @@ describe('final', () => {
 
     describe('.options()', () => {
       it('returns args from argv', () => {
-        assert.deepStrictEqual(final.CLI.options(), { first: '1', second: '2' })
+        assert.deepStrictEqual(final.CLI.options(), { first: 1, second: 2 })
       })
     })
 

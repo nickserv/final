@@ -6,6 +6,7 @@
   "dependencies": {
     "express": "^4.13.3",
     "jade": "^1.11.0",
+    "lodash": "^3.10.1",
     "minimist": "^1.2.0"
   },
   "devDependencies": {

@@ -1,4 +1,5 @@
 'use strict'
+var _ = require('lodash')
 var express = require('express')
 var http = require('http')
 var minimist = require('minimist')
@@ -17,14 +18,7 @@ class Command {
     var optionNames = Object.keys(options)
     if (!this.validate(optionNames)) throw new ValidationError()
 
-    return String(this.core(Command.convertOptions(options)))
-  }
-
-  static convertOptions (options) {
-    return Object.keys(options).reduce((memo, key) => {
-      memo[key] = String(options[key])
-      return memo
-    }, {})
+    return String(this.core(_.mapValues(options, String)))
   }
 
   validate (optionNames) {
@@ -48,10 +42,6 @@ class API extends Runner {
     this.server = http.createServer(this.callback.bind(this))
   }
 
-  static options (req) {
-    return url.parse(req.url, true).query
-  }
-
   callback (req, res) {
     res.setHeader('content-type', 'text/plain')
     res.writeHead(200)
@@ -60,6 +50,10 @@ class API extends Runner {
 
   close () {
     this.server.close()
+  }
+
+  static options (req) {
+    return url.parse(req.url, true).query
   }
 
   run () {
@@ -111,10 +105,7 @@ class App extends Runner {
 class CLI extends Runner {
   static options () {
     var args = minimist(process.argv.slice(2))
-
-    var options = Object.assign({}, args)
-    delete options._
-    return Command.convertOptions(options)
+    return _.omit(args, '_')
   }
 
   run () {
