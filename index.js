@@ -8,10 +8,6 @@ class ValidationError extends Error {
 }
 
 class Command {
-  static convertOptions (options) {
-    return _.mapValues(options, String)
-  }
-
   static isSubset (subset, superset) {
     return subset.every(item => superset.indexOf(item) > -1)
   }
@@ -20,7 +16,7 @@ class Command {
     var optionNames = Object.keys(options)
     if (!this.validate(optionNames)) throw new ValidationError()
 
-    return String(this.core(Command.convertOptions(options)))
+    return String(this.core(_.mapValues(options, String)))
   }
 
   validate (optionNames) {
@@ -66,8 +62,7 @@ class API extends Runner {
 class CLI extends Runner {
   static options () {
     var args = minimist(process.argv.slice(2))
-    var options = _.omit(args, '_')
-    return Command.convertOptions(options)
+    return _.omit(args, '_')
   }
 
   run () {
