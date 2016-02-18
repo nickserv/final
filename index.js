@@ -1,4 +1,5 @@
 'use strict'
+var _ = require('lodash')
 var http = require('http')
 var minimist = require('minimist')
 var url = require('url')
@@ -7,6 +8,10 @@ class ValidationError extends Error {
 }
 
 class Command {
+  static convertOptions (options) {
+    return _.mapValues(options, String)
+  }
+
   static isSubset (subset, superset) {
     return subset.every(item => superset.indexOf(item) > -1)
   }
@@ -16,13 +21,6 @@ class Command {
     if (!this.validate(optionNames)) throw new ValidationError()
 
     return String(this.core(Command.convertOptions(options)))
-  }
-
-  static convertOptions (options) {
-    return Object.keys(options).reduce((memo, key) => {
-      memo[key] = String(options[key])
-      return memo
-    }, {})
   }
 
   validate (optionNames) {
@@ -46,10 +44,6 @@ class API extends Runner {
     this.server = http.createServer(this.callback.bind(this))
   }
 
-  static options (req) {
-    return url.parse(req.url, true).query
-  }
-
   callback (req, res) {
     res.setHeader('content-type', 'text/plain')
     res.writeHead(200)
@@ -60,6 +54,10 @@ class API extends Runner {
     this.server.close()
   }
 
+  static options (req) {
+    return url.parse(req.url, true).query
+  }
+
   run () {
     this.server.listen(3000)
   }
@@ -68,9 +66,7 @@ class API extends Runner {
 class CLI extends Runner {
   static options () {
     var args = minimist(process.argv.slice(2))
-
-    var options = Object.assign({}, args)
-    delete options._
+    var options = _.omit(args, '_')
     return Command.convertOptions(options)
   }
 

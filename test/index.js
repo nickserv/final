@@ -1,4 +1,5 @@
 'use strict'
+var _ = require('lodash')
 var assert = require('assert')
 var final = require('..')
 var http = require('http')
@@ -11,8 +12,8 @@ class Adder extends final.Command {
   }
 
   core (options) {
-    var first = parseInt(options.first, 10)
-    var second = parseInt(options.second, 10)
+    var first = _.parseInt(options.first)
+    var second = _.parseInt(options.second)
 
     return first + second
   }
@@ -42,6 +43,29 @@ describe('final', () => {
     var adder = command
     var greeter = new Greeter()
     var superGreeter = new SuperGreeter()
+
+    describe('.convertOptions()', () => {
+      context('given empty options', () => {
+        it('leaves the option values alone', () => {
+          assert.deepStrictEqual(final.Command.convertOptions({}),
+                                 {})
+        })
+      })
+
+      context('given option values that are Strings', () => {
+        it('leaves the option values alone', () => {
+          assert.deepStrictEqual(final.Command.convertOptions({ first: '1', second: '2' }),
+                                 { first: '1', second: '2' })
+        })
+      })
+
+      context('given option values that are not Strings', () => {
+        it('converts the option values to Strings', () => {
+          assert.deepStrictEqual(final.Command.convertOptions({ first: 1, second: 2 }),
+                                 { first: '1', second: '2' })
+        })
+      })
+    })
 
     describe('#run()', () => {
       it('returns a result or throws an error if options are invalid', () => {
@@ -95,14 +119,29 @@ describe('final', () => {
     afterEach(() => api.close())
 
     describe('constructor', () => {
-      it('creates a new API with a callback', () => {
+      it('creates a new API with a server', () => {
+        assert(api.server instanceof http.Server)
+      })
+    })
+
+    describe('#callback()', () => {
+      it('takes a request and a response', () => {
         assert(api.callback instanceof Function)
         assert.strictEqual(api.callback.length, 2)
       })
 
-      it('creates a new API with a server', () => {
-        assert(api.server instanceof http.Server)
-      })
+      it('gives an accurate response', sinon.test(function () {
+        var res = {
+          end: sinon.stub(),
+          setHeader: sinon.stub(),
+          writeHead: sinon.stub()
+        }
+
+        api.callback(req, res)
+
+        sinon.assert.calledOnce(res.end)
+        sinon.assert.calledWithExactly(res.end, '3\n')
+      }))
     })
 
     describe('#close()', () => {
