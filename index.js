@@ -5,6 +5,10 @@ var minimist = require('minimist')
 var url = require('url')
 
 class ValidationError extends Error {
+  constructor () {
+    super()
+    this.name = 'ValidationError'
+  }
 }
 
 class Command {
