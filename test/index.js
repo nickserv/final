@@ -18,29 +18,6 @@ describe('final', () => {
   var command = new Adder()
 
   describe('Command', () => {
-    describe('.convertOptions()', () => {
-      context('given empty options', () => {
-        it('leaves the option values alone', () => {
-          assert.deepStrictEqual(final.Command.convertOptions({}),
-                                 {})
-        })
-      })
-
-      context('given option values that are Strings', () => {
-        it('leaves the option values alone', () => {
-          assert.deepStrictEqual(final.Command.convertOptions({ first: '1', second: '2' }),
-                                 { first: '1', second: '2' })
-        })
-      })
-
-      context('given option values that are not Strings', () => {
-        it('converts the option values to Strings', () => {
-          assert.deepStrictEqual(final.Command.convertOptions({ first: 1, second: 2 }),
-                                 { first: '1', second: '2' })
-        })
-      })
-    })
-
     describe('#run()', () => {
       it('returns a String result', () => {
         assert.strictEqual(command.run({ first: 1, second: 2 }), '3')
@@ -131,7 +108,7 @@ describe('final', () => {
 
     describe('.options()', () => {
       it('returns args from argv', () => {
-        assert.deepStrictEqual(final.CLI.options(), { first: '1', second: '2' })
+        assert.deepStrictEqual(final.CLI.options(), { first: 1, second: 2 })
       })
     })
 

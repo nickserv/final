@@ -5,12 +5,8 @@ var minimist = require('minimist')
 var url = require('url')
 
 class Command {
-  static convertOptions (options) {
-    return _.mapValues(options, String)
-  }
-
   run (options) {
-    return String(this.core(Command.convertOptions(options)))
+    return String(this.core(_.mapValues(options, String)))
   }
 }
 
@@ -48,8 +44,7 @@ class API extends Runner {
 class CLI extends Runner {
   static options () {
     var args = minimist(process.argv.slice(2))
-    var options = _.omit(args, '_')
-    return Command.convertOptions(options)
+    return _.omit(args, '_')
   }
 
   run () {
