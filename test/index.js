@@ -5,44 +5,31 @@ var final = require('..')
 var http = require('http')
 var sinon = require('sinon')
 
-class Adder extends final.Command {
-  constructor () {
-    super()
-    this.requiredOptions = ['first', 'second']
-  }
-
-  core (options) {
+describe('final', () => {
+  var core = options => {
     var first = _.parseInt(options.first)
     var second = _.parseInt(options.second)
 
     return first + second
   }
-}
+  var command = new final.Command(
+    core,
+    { requiredOptions: ['first', 'second'] }
+  )
 
-class Greeter extends final.Command {
-  core () {
-    return 'Hello, world!'
-  }
-}
-
-class SuperGreeter extends final.Command {
-  constructor () {
-    super()
-    this.allowedOptions = ['name']
-  }
-
-  core (options) {
-    return `Hello, ${options.name || 'world'}!`
-  }
-}
-
-describe('final', () => {
-  var command = new Adder()
+  var adder = command
+  var greeter = new final.Command(() => 'Hello, world!')
+  var superGreeter = new final.Command(
+    options => `Hello, ${options.name || 'world'}!`,
+    { allowedOptions: ['name'] }
+  )
 
   describe('Command', () => {
-    var adder = command
-    var greeter = new Greeter()
-    var superGreeter = new SuperGreeter()
+    describe('constructor', () => {
+      it('creates a new Command with the given core', () => {
+        assert.strictEqual(command.core, core)
+      })
+    })
 
     describe('#run()', () => {
       it('returns a result or throws an error if options are invalid', () => {

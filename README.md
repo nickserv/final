@@ -15,39 +15,32 @@ Final is in early (pre-1.0) development. It is usable, but its API may change fr
 The examples below can be run in a Node.js script or shell.
 
 ### Getting Started
-First, create a subclass of `Command` and implement the `core()` method. Skip to the Usage section for more information about how to write `Command`s.
+First, create an instance of `Command` with a function implementing the `Command`'s core. Skip to the Usage section for more information about how to write `Command`s.
 ```javascript
-class Adder extends final.Command {
-  core (options) {
-    var first = parseInt(options.first, 10)
-    var second = parseInt(options.second, 10)
+var adder = new final.Command(options => {
+  var first = parseInt(options.first, 10)
+  var second = parseInt(options.second, 10)
 
-    return first + second
-  }
-}
+  return first + second
+})
 ```
-This `Command` exposes a `run()` method wraps the `core()` with some extra type conversion and validation. This is the recommended way of running `Command`s. Note that your `core()` method should treat all options as `String`s, since all inputs and outputs are converted to and from `String`s by the `run()` method.
+This `Command` exposes a `run()` method which wraps the given core with some extra type conversion and validation. This is the recommended way of running `Command`s. Note that your core function should treat all options as `String`s, since all inputs and outputs are converted to and from `String`s by the `run()` method.
 ```javascript
-var command = new Adder()
-var result = command.run({ first: 1, second: 2 }) // this returns a String
+var result = adder.run({ first: 1, second: 2 }) // this returns a String
 console.log(result)
 ```
 
 ### API Runner
 Final can generate callbacks for Node's `http.Server` class, allowing you to wrap `Command`s in web APIs. You can also embed `Command`s in larger Node web apps.
 ```javascript
-var final = require('final')
-var command = new Adder()
-new final.API(command).run()
+new final.API(adder).run()
 ```
 Here, Final starts a web API at `localhost:3000` that wraps your `Command`. You can call it with HTTP requests like `GET localhost:3000?first=1&second=2`, and you will get a plain text response with the result.
 
 ### CLI Runner
 Final can create command line interfaces around your `Command`.
 ```javascript
-var final = require('final')
-var command = new Adder()
-new final.CLI(command).run()
+new final.CLI(adder).run()
 ```
 Final will read arguments from the shell command running this JavaScript code, and
 then it will immediately run the `Command` with the given options and print the

@@ -10,6 +10,11 @@ class ValidationError extends Error {
 }
 
 class Command {
+  constructor (core, options) {
+    this.core = core
+    Object.assign(this, options)
+  }
+
   static isSubset (subset, superset) {
     return subset.every(item => superset.indexOf(item) > -1)
   }
