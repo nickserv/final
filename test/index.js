@@ -6,7 +6,7 @@ var http = require('http')
 var sinon = require('sinon')
 
 describe('final', () => {
-  var core = options => {
+  var core = (options) => {
     var first = _.parseInt(options.first)
     var second = _.parseInt(options.second)
 
@@ -43,7 +43,7 @@ describe('final', () => {
     var req = { url: 'http://localhost:3000?first=1&second=2' }
 
     var api
-    beforeEach(() => api = new final.API(command))
+    beforeEach(() => { api = new final.API(command) })
     afterEach(() => api.close())
 
     describe('constructor', () => {
@@ -76,7 +76,7 @@ describe('final', () => {
       it('closes the API server', (done) => {
         api.close()
 
-        http.get('http://localhost:3000', res =>
+        http.get('http://localhost:3000', (res) =>
           done('Error: API server should be closed')
         ).on('error', () => done())
       })
@@ -92,7 +92,7 @@ describe('final', () => {
       it('runs an API for the given command', (done) => {
         api.run()
 
-        http.get(req.url, res => {
+        http.get(req.url, (res) => {
           assert.strictEqual(res.statusCode, 200)
           assert.strictEqual(res.headers['content-type'], 'text/plain')
 
