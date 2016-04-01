@@ -6,7 +6,7 @@
   "dependencies": {
     "express": "^4.13.3",
     "jade": "^1.11.0",
-    "lodash": "^3.10.1",
+    "lodash": "^4.6.1",
     "minimist": "^1.2.0"
   },
   "devDependencies": {
@@ -14,7 +14,7 @@
     "istanbul": "^0.4.2",
     "mocha": "^2.3.4",
     "sinon": "^1.17.2",
-    "standard": "^5.4.1"
+    "standard": "^6.0.8"
   },
   "scripts": {
     "cover": "istanbul cover _mocha",

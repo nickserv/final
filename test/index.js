@@ -6,25 +6,28 @@ var http = require('http')
 var sinon = require('sinon')
 
 describe('final', () => {
-  var core = options => {
+  var core = (options) => {
     var first = _.parseInt(options.first)
     var second = _.parseInt(options.second)
 
     return first + second
   }
+
   var command = new final.Command(
     core,
     { requiredOptions: ['first', 'second'] }
   )
 
-  var adder = command
-  var greeter = new final.Command(() => 'Hello, world!')
-  var superGreeter = new final.Command(
-    options => `Hello, ${options.name || 'world'}!`,
-    { allowedOptions: ['name'] }
-  )
-
   describe('Command', () => {
+    var adder = command
+
+    var greeter = new final.Command(() => 'Hello, world!')
+
+    var superGreeter = new final.Command(
+      (options) => `Hello, ${options.name || 'world'}!`,
+      { allowedOptions: ['name'] }
+    )
+
     describe('constructor', () => {
       it('creates a new Command with the given core', () => {
         assert.strictEqual(command.core, core)
@@ -79,7 +82,7 @@ describe('final', () => {
     var req = { url: 'http://localhost:3000?first=1&second=2' }
 
     var api
-    beforeEach(() => api = new final.API(command))
+    beforeEach(() => { api = new final.API(command) })
     afterEach(() => api.close())
 
     describe('constructor', () => {
@@ -112,7 +115,7 @@ describe('final', () => {
       it('closes the API server', (done) => {
         api.close()
 
-        http.get('http://localhost:3000', res =>
+        http.get('http://localhost:3000', (res) =>
           done('Error: API server should be closed')
         ).on('error', () => done())
       })
@@ -128,7 +131,7 @@ describe('final', () => {
       it('runs an API for the given command', (done) => {
         api.run()
 
-        http.get(req.url, res => {
+        http.get(req.url, (res) => {
           assert.strictEqual(res.statusCode, 200)
           assert.strictEqual(res.headers['content-type'], 'text/plain')
 
@@ -146,7 +149,7 @@ describe('final', () => {
     var resultURL = indexURL + 'result?first=1&second=2'
 
     var app
-    beforeEach(() => app = new final.App(command))
+    beforeEach(() => { app = new final.App(command) })
     afterEach(() => app.close())
 
     describe('constructor', () => {
@@ -159,7 +162,7 @@ describe('final', () => {
       it('closes the app server', (done) => {
         app.close()
 
-        http.get(indexURL, res =>
+        http.get(indexURL, (res) =>
           done('Error: App server should be closed')
         ).on('error', () => done())
       })
@@ -175,12 +178,12 @@ describe('final', () => {
       it('runs an app for the given command', (done) => {
         app.run()
 
-        http.get(indexURL, res => {
+        http.get(indexURL, (res) => {
           assert.strictEqual(res.statusCode, 200)
           assert(res.headers['content-type'].includes('text/html'))
         }).on('error', done)
 
-        http.get(resultURL, res => {
+        http.get(resultURL, (res) => {
           assert.strictEqual(res.statusCode, 200)
           assert(res.headers['content-type'].includes('text/html'))
 

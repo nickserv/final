@@ -7,6 +7,10 @@ var path = require('path')
 var url = require('url')
 
 class ValidationError extends Error {
+  constructor () {
+    super()
+    this.name = 'ValidationError'
+  }
 }
 
 class Command {
@@ -16,7 +20,7 @@ class Command {
   }
 
   static isSubset (subset, superset) {
-    return subset.every(item => superset.indexOf(item) > -1)
+    return subset.every((item) => superset.indexOf(item) > -1)
   }
 
   run (options) {
