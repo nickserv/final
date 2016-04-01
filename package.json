@@ -4,8 +4,8 @@
   "description": "A set of tools for writing JavaScript code once that runs on the command line, browser, and more.",
   "main": "index.js",
   "dependencies": {
+    "ejs": "^2.4.1",
     "express": "^4.13.3",
-    "jade": "^1.11.0",
     "lodash": "^4.12.0",
     "minimist": "^1.2.0"
   },
