@@ -14,7 +14,18 @@ class ValidationError extends Error {
 class Command {
   constructor (core, options) {
     this.core = core
-    Object.assign(this, options)
+    this.options = options
+
+    // TODO: DRY
+    _.each(this.options, (option, name) => {
+      if (option.required) {
+        if (!this.requiredOptions) this.requiredOptions = []
+        this.requiredOptions.push(name)
+      } else {
+        if (!this.allowedOptions) this.allowedOptions = []
+        this.allowedOptions.push(name)
+      }
+    })
   }
 
   static isSubset (subset, superset) {

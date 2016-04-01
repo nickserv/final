@@ -13,10 +13,12 @@ describe('final', () => {
     return first + second
   }
 
-  var command = new final.Command(
-    core,
-    { requiredOptions: ['first', 'second'] }
-  )
+  var options = {
+    first: { required: true },
+    second: { required: true }
+  }
+
+  var command = new final.Command(core, options)
 
   describe('Command', () => {
     var adder = command
@@ -25,12 +27,15 @@ describe('final', () => {
 
     var superGreeter = new final.Command(
       (options) => `Hello, ${options.name || 'world'}!`,
-      { allowedOptions: ['name'] }
+      { name: {} }
     )
 
     describe('constructor', () => {
-      it('creates a new Command with the given core', () => {
+      it('creates a new Command with the given core and options', () => {
         assert.strictEqual(command.core, core)
+        assert.strictEqual(command.options, options)
+        assert.strictEqual(command.allowedOptions, undefined)
+        assert.deepStrictEqual(command.requiredOptions, ['first', 'second'])
       })
     })
 
