@@ -6,11 +6,8 @@ var http = require('http')
 var sinon = require('sinon')
 
 describe('final', () => {
-  var core = (options) => {
-    var first = _.parseInt(options.first)
-    var second = _.parseInt(options.second)
-
-    return first + second
+  function core (options) {
+    return _.parseInt(options.first) + _.parseInt(options.second)
   }
 
   var command = new final.Command(core)
@@ -53,8 +50,11 @@ describe('final', () => {
     })
 
     describe('#callback()', () => {
-      it('takes a request and a response', () => {
+      it('is a function', () => {
         assert(api.callback instanceof Function)
+      })
+
+      it('takes a request and a response', () => {
         assert.strictEqual(api.callback.length, 2)
       })
 
@@ -89,18 +89,31 @@ describe('final', () => {
     })
 
     describe('#run()', () => {
-      it('runs an API for the given command', (done) => {
+      var res
+
+      beforeEach((done) => {
         api.run()
+        http.get(req.url, (thisRes) => {
+          res = thisRes
+          done()
+        }).on('error', done)
+      })
 
-        http.get(req.url, (res) => {
+      describe('response', () => {
+        it('has 200 status code', () => {
           assert.strictEqual(res.statusCode, 200)
-          assert.strictEqual(res.headers['content-type'], 'text/plain')
+        })
 
+        it('has a text/plain content type', () => {
+          assert.strictEqual(res.headers['content-type'], 'text/plain')
+        })
+
+        it('has a body of "3"', (done) => {
           res.on('data', (chunk) => {
             assert.strictEqual(chunk.toString('utf8'), '3\n')
             done()
           })
-        }).on('error', done)
+        })
       })
     })
   })
