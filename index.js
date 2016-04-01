@@ -85,7 +85,7 @@ class App extends Runner {
 
     // configuration
     app.set('views', path.join(__dirname, 'views'))
-    app.set('view engine', 'jade')
+    app.set('view engine', 'ejs')
 
     // gui
     app.get('/', (req, res, next) => {
