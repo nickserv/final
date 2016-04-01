@@ -6,16 +6,19 @@ var http = require('http')
 var sinon = require('sinon')
 
 describe('final', () => {
-  var core = (options) => {
-    var first = _.parseInt(options.first)
-    var second = _.parseInt(options.second)
-
-    return first + second
+  function core (options) {
+    return _.parseInt(options.first) + _.parseInt(options.second)
   }
 
   var options = {
-    first: { required: true },
-    second: { required: true }
+    first: {
+      description: 'first number to add',
+      required: true
+    },
+    second: {
+      description: 'second number to add',
+      required: true
+    }
   }
 
   var command = new final.Command(core, options)
@@ -152,7 +155,23 @@ describe('final', () => {
   describe('CLI', () => {
     var cli = new final.CLI(command)
 
-    process.argv = 'node cli.js --first 1 --second 2'.split(' ')
+    beforeEach(() => { process.argv = 'node cli.js --first 1 --second 2'.split(' ') })
+
+    describe('#help()', () => {
+      it('returns formatted help text', () => {
+        var expected = [
+          'Usage: cli.js [options]',
+          '',
+          'Options:',
+          '',
+          '  --help               output usage information',
+          '  --first              first number to add',
+          '  --second             second number to add'
+        ].join('\n')
+
+        assert.strictEqual(cli.help(), expected)
+      })
+    })
 
     describe('.options()', () => {
       it('returns args from argv', () => {
@@ -161,13 +180,21 @@ describe('final', () => {
     })
 
     describe('#run()', () => {
-      it('runs a cli for the given command', sinon.test(function () {
-        this.stub(console, 'log')
-        cli.run()
+      context('without the help flag', () => {
+        it('runs a cli for the given command', sinon.test(function () {
+          this.stub(console, 'log')
+          cli.run()
 
-        sinon.assert.calledOnce(console.log)
-        sinon.assert.calledWithExactly(console.log, '3')
-      }))
+          sinon.assert.calledOnce(console.log)
+          sinon.assert.calledWithExactly(console.log, '3')
+        }))
+      })
+
+      context('with the help flag', () => {
+        beforeEach(() => { process.argv = 'node cli.js --help'.split(' ') })
+
+        it('prints usage information')
+      })
     })
   })
 })

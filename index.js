@@ -80,13 +80,29 @@ class API extends Runner {
 }
 
 class CLI extends Runner {
+  help () {
+    var helpOptions = { help: { description: 'output usage information' } }
+    var extendedOptions = _.extend(helpOptions, this.command.options)
+
+    var options = _.map(extendedOptions, (option, name) => {
+      return `  --${_.padEnd(name, 19)}${option.description}`
+    }).join('\n')
+
+    return [
+      `Usage: ${process.argv[1]} [options]`,
+      'Options:',
+      options
+    ].join('\n\n')
+  }
+
   static options () {
     var args = minimist(process.argv.slice(2))
     return _.omit(args, '_')
   }
 
   run () {
-    console.log(this.command.run(CLI.options()))
+    var options = CLI.options()
+    console.log(options.help ? this.help() : this.command.run(options))
   }
 }
 
