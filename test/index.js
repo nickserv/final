@@ -6,8 +6,8 @@ var http = require('http')
 var sinon = require('sinon')
 
 describe('final', () => {
-  function commandCore (options) {
-    return _.parseInt(options.first) + _.parseInt(options.second)
+  var commandCore = (options) => {
+    return _.parseInt(options.first) + (_.parseInt(options.second) || 0)
   }
 
   var commandOptions = {
@@ -16,8 +16,7 @@ describe('final', () => {
       required: true
     },
     second: {
-      description: 'second number to add',
-      required: true
+      description: 'second number to add'
     }
   }
 
@@ -27,63 +26,141 @@ describe('final', () => {
   var stringOptions = _.mapValues(options, String)
 
   describe('Command', () => {
-    var adder = command
-
-    var greeter = new final.Command(() => 'Hello, world!')
-
-    var superGreeter = new final.Command(
-      (options) => `Hello, ${options.name || 'world'}!`,
-      { name: {} }
-    )
+    var greeting = 'Hello, world!'
+    var simpleCommandCore = () => greeting
+    var simpleCommand = new final.Command(simpleCommandCore)
 
     describe('constructor', () => {
-      it('uses the given core', () => {
-        assert.strictEqual(command.core, commandCore)
+      context('for a command without options', () => {
+        it('uses the given core', () => {
+          assert.strictEqual(simpleCommand.core, simpleCommandCore)
+        })
+
+        it('doesn\'t use any options', () => {
+          assert.strictEqual(simpleCommand.options, undefined)
+        })
+
+        it('doesn\'t create allowedOptions', () => {
+          assert.strictEqual(simpleCommand.allowedOptions, undefined)
+        })
+
+        it('doesn\'t create requiredOptions', () => {
+          assert.strictEqual(simpleCommand.requiredOptions, undefined)
+        })
       })
 
-      it('uses the given options', () => {
-        assert.strictEqual(command.options, commandOptions)
-      })
+      context('for a command with required and optional options', () => {
+        it('uses the given core', () => {
+          assert.strictEqual(command.core, commandCore)
+        })
 
-      it('creates allowedOptions', () => {
-        assert.strictEqual(command.allowedOptions, undefined)
-      })
+        it('uses the given options', () => {
+          assert.deepStrictEqual(command.options, commandOptions)
+        })
 
-      it('creates requiredOptions', () => {
-        assert.deepStrictEqual(command.requiredOptions, ['first', 'second'])
+        it('creates allowedOptions', () => {
+          assert.deepStrictEqual(command.allowedOptions, ['second'])
+        })
+
+        it('creates requiredOptions', () => {
+          assert.deepStrictEqual(command.requiredOptions, ['first'])
+        })
       })
     })
 
     describe('#run()', () => {
-      it('returns a String result or throws an error if options are invalid', () => {
-        assert.strictEqual(adder.run({ first: 1, second: 2 }), '3')
-        assert.throws(() => adder.run({}), final.ValidationError)
-        assert.throws(() => adder.run({ first: 1 }), final.ValidationError)
-        assert.throws(() => adder.run({ invalid: 1 }), final.ValidationError)
+      context('for a command without options', () => {
+        context('given empty options', () => {
+          it('returns a String result', () => {
+            assert.strictEqual(simpleCommand.run({}), greeting)
+          })
+        })
 
-        assert.strictEqual(greeter.run({}), 'Hello, world!')
-        assert.strictEqual(greeter.run({ extra: 'option' }), 'Hello, world!')
+        context('given any option', () => {
+          it('returns a String result', () => {
+            assert.strictEqual(simpleCommand.run({ extra: true }), greeting)
+          })
+        })
+      })
 
-        assert.strictEqual(superGreeter.run({}), 'Hello, world!')
-        assert.strictEqual(superGreeter.run({ name: 'dude' }), 'Hello, dude!')
-        assert.throws(() => superGreeter.run({ invalid: 'dude' }),
-                     final.ValidationError)
+      context('for a command with required and optional options', () => {
+        context('given empty options', () => {
+          it('throws an error', () => {
+            assert.throws(() => command.run({}), final.ValidationError)
+          })
+        })
+
+        context('given only the required option', () => {
+          it('returns a String result', () => {
+            assert.strictEqual(command.run({ first: 1 }), '1')
+          })
+        })
+
+        context('given only the optional option', () => {
+          it('throws an error', () => {
+            assert.throws(() => command.run({ second: 2 }), final.ValidationError)
+          })
+        })
+
+        context('given both options', () => {
+          it('returns a String result', () => {
+            assert.strictEqual(command.run(options), '3')
+          })
+        })
+
+        context('given an invalid option', () => {
+          it('throws an error', () => {
+            assert.throws(() => command.run({ first: 1, invalid: true }), final.ValidationError)
+          })
+        })
       })
     })
 
     describe('#validate()', () => {
-      it('returns true if options are valid', () => {
-        assert.strictEqual(adder.validate(['first', 'second']), true)
-        assert.strictEqual(adder.validate([]), false)
-        assert.strictEqual(adder.validate(['first']), false)
-        assert.strictEqual(adder.validate(['invalid']), false)
+      context('for a command without options', () => {
+        context('given empty options', () => {
+          it('returns true', () => {
+            assert.strictEqual(simpleCommand.validate([]), true)
+          })
+        })
 
-        assert.strictEqual(greeter.validate([]), true)
-        assert.strictEqual(greeter.validate(['extra']), true)
+        context('given any option', () => {
+          it('returns true', () => {
+            assert.strictEqual(simpleCommand.validate(['extra']), true)
+          })
+        })
+      })
 
-        assert.strictEqual(superGreeter.validate([]), true)
-        assert.strictEqual(superGreeter.validate(['name']), true)
-        assert.strictEqual(superGreeter.validate(['invalid']), false)
+      context('for a command with required and optional options', () => {
+        context('given empty options', () => {
+          it('returns false', () => {
+            assert.strictEqual(command.validate([]), false)
+          })
+        })
+
+        context('given only the required option', () => {
+          it('returns true', () => {
+            assert.strictEqual(command.validate(['first']), true)
+          })
+        })
+
+        context('given only the optional option', () => {
+          it('returns false', () => {
+            assert.strictEqual(command.validate(['second']), false)
+          })
+        })
+
+        context('given both options', () => {
+          it('returns true', () => {
+            assert.strictEqual(command.validate(['first', 'second']), true)
+          })
+        })
+
+        context('given an invalid option', () => {
+          it('returns false', () => {
+            assert.strictEqual(command.validate(['first', 'invalid']), false)
+          })
+        })
       })
     })
   })
@@ -171,9 +248,11 @@ describe('final', () => {
   })
 
   describe('CLI', () => {
+    var args
     var cli = new final.CLI(command)
 
-    beforeEach(() => { process.argv = 'node cli.js --first 1 --second 2'.split(' ') })
+    before(() => args = 'node cli.js --first 1 --second 2')
+    beforeEach(() => process.argv = args.split(' '))
 
     describe('#help()', () => {
       it('returns formatted help text', () => {
@@ -209,7 +288,7 @@ describe('final', () => {
       })
 
       context('with the help flag', () => {
-        beforeEach(() => { process.argv = 'node cli.js --help'.split(' ') })
+        before(() => args = 'node cli.js --help')
 
         it('runs a cli for the given command that prints usage information')
       })
