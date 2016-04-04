@@ -2,6 +2,7 @@
 var _ = require('lodash')
 var http = require('http')
 var minimist = require('minimist')
+var path = require('path')
 var url = require('url')
 
 class ValidationError extends Error {
@@ -82,7 +83,7 @@ class CLI extends Runner {
     }).join('\n')
 
     return [
-      `Usage: ${process.argv[1]} [options]`,
+      `Usage: ${path.basename(process.argv[1], '.js')} [options]`,
       'Options:',
       options
     ].join('\n\n')

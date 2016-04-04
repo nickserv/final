@@ -241,7 +241,7 @@ describe('final', () => {
     describe('#help()', () => {
       it('returns formatted help text', () => {
         var expected = [
-          'Usage: cli.js [options]',
+          'Usage: cli [options]',
           '',
           'Options:',
           '',
