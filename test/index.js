@@ -39,14 +39,6 @@ describe('final', () => {
         it('doesn\'t use any options', () => {
           assert.strictEqual(simpleCommand.options, undefined)
         })
-
-        it('doesn\'t create allowedOptions', () => {
-          assert.strictEqual(simpleCommand.allowedOptions, undefined)
-        })
-
-        it('doesn\'t create requiredOptions', () => {
-          assert.strictEqual(simpleCommand.requiredOptions, undefined)
-        })
       })
 
       context('for a command with required and optional options', () => {
@@ -56,14 +48,6 @@ describe('final', () => {
 
         it('uses the given options', () => {
           assert.deepStrictEqual(command.options, commandOptions)
-        })
-
-        it('creates allowedOptions', () => {
-          assert.deepStrictEqual(command.allowedOptions, ['second'])
-        })
-
-        it('creates requiredOptions', () => {
-          assert.deepStrictEqual(command.requiredOptions, ['first'])
         })
       })
     })

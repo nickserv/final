@@ -15,21 +15,10 @@ class Command {
   constructor (core, options) {
     this.core = core
     this.options = options
-
-    // TODO: DRY
-    _.each(this.options, (option, name) => {
-      if (option.required) {
-        if (!this.requiredOptions) this.requiredOptions = []
-        this.requiredOptions.push(name)
-      } else {
-        if (!this.allowedOptions) this.allowedOptions = []
-        this.allowedOptions.push(name)
-      }
-    })
   }
 
   static isSubset (subset, superset) {
-    return subset.every((item) => superset.indexOf(item) > -1)
+    return _.every(subset, (item) => _.includes(superset, item))
   }
 
   run (options) {
@@ -40,10 +29,14 @@ class Command {
   }
 
   validate (optionNames) {
-    var meetsRequiredOptions = !Array.isArray(this.requiredOptions) ||
-                                 Command.isSubset(this.requiredOptions, optionNames)
-    var meetsAllowedOptions = !Array.isArray(this.allowedOptions) ||
-                                Command.isSubset(optionNames, this.allowedOptions.concat(this.requiredOptions))
+    if (!this.options) return true
+
+    var options = _.keys(this.options)
+    var requiredOptions = _.keys(_.pickBy(this.options, 'required'))
+
+    var meetsRequiredOptions = Command.isSubset(requiredOptions, optionNames)
+    var meetsAllowedOptions = Command.isSubset(optionNames, options)
+
     return meetsRequiredOptions && meetsAllowedOptions
   }
 }
