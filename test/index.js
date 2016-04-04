@@ -251,8 +251,8 @@ describe('final', () => {
     var args
     var cli = new final.CLI(command)
 
-    before(() => args = 'node cli.js --first 1 --second 2')
-    beforeEach(() => process.argv = args.split(' '))
+    before(() => { args = 'node cli.js --first 1 --second 2' })
+    beforeEach(() => { process.argv = args.split(' ') })
 
     describe('#help()', () => {
       it('returns formatted help text', () => {
@@ -288,7 +288,7 @@ describe('final', () => {
       })
 
       context('with the help flag', () => {
-        before(() => args = 'node cli.js --help')
+        before(() => { args = 'node cli.js --help' })
 
         it('runs a cli for the given command that prints usage information')
       })
