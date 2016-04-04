@@ -6,11 +6,11 @@ var http = require('http')
 var sinon = require('sinon')
 
 describe('final', () => {
-  function core (options) {
+  function commandCore (options) {
     return _.parseInt(options.first) + _.parseInt(options.second)
   }
 
-  var options = {
+  var commandOptions = {
     first: {
       description: 'first number to add',
       required: true
@@ -21,7 +21,10 @@ describe('final', () => {
     }
   }
 
-  var command = new final.Command(core, options)
+  var command = new final.Command(commandCore, commandOptions)
+
+  var options = { first: 1, second: 2 }
+  var stringOptions = _.mapValues(options, String)
 
   describe('Command', () => {
     var adder = command
@@ -34,16 +37,25 @@ describe('final', () => {
     )
 
     describe('constructor', () => {
-      it('creates a new Command with the given core and options', () => {
-        assert.strictEqual(command.core, core)
-        assert.strictEqual(command.options, options)
+      it('uses the given core', () => {
+        assert.strictEqual(command.core, commandCore)
+      })
+
+      it('uses the given options', () => {
+        assert.strictEqual(command.options, commandOptions)
+      })
+
+      it('creates allowedOptions', () => {
         assert.strictEqual(command.allowedOptions, undefined)
+      })
+
+      it('creates requiredOptions', () => {
         assert.deepStrictEqual(command.requiredOptions, ['first', 'second'])
       })
     })
 
     describe('#run()', () => {
-      it('returns a result or throws an error if options are invalid', () => {
+      it('returns a String result or throws an error if options are invalid', () => {
         assert.strictEqual(adder.run({ first: 1, second: 2 }), '3')
         assert.throws(() => adder.run({}), final.ValidationError)
         assert.throws(() => adder.run({ first: 1 }), final.ValidationError)
@@ -60,7 +72,7 @@ describe('final', () => {
     })
 
     describe('#validate()', () => {
-      it('returns true if the options are valid', () => {
+      it('returns true if options are valid', () => {
         assert.strictEqual(adder.validate(['first', 'second']), true)
         assert.strictEqual(adder.validate([]), false)
         assert.strictEqual(adder.validate(['first']), false)
@@ -77,24 +89,23 @@ describe('final', () => {
   })
 
   describe('Runner', () => {
-    var runner = new final.Runner(command)
-
     describe('constructor', () => {
-      it('creates a new Runner with the given command', () => {
-        assert.strictEqual(runner.command, command)
+      it('uses the given command', () => {
+        assert.strictEqual(new final.Runner(command).command, command)
       })
     })
   })
 
   describe('API', () => {
-    var req = { url: 'http://localhost:3000?first=1&second=2' }
+    var api = new final.API(command)
 
-    var api
-    beforeEach(() => { api = new final.API(command) })
-    afterEach(() => api.close())
+    var req = new http.IncomingMessage()
+    req.url = 'http://localhost:3000?first=1&second=2'
+
+    after(() => api.close())
 
     describe('constructor', () => {
-      it('creates a new API with a server', () => {
+      it('creates a server', () => {
         assert(api.server instanceof http.Server)
       })
     })
@@ -107,26 +118,13 @@ describe('final', () => {
       it('takes a request and a response', () => {
         assert.strictEqual(api.callback.length, 2)
       })
-
-      it('gives an accurate response', sinon.test(function () {
-        var res = {
-          end: sinon.stub(),
-          setHeader: sinon.stub(),
-          writeHead: sinon.stub()
-        }
-
-        api.callback(req, res)
-
-        sinon.assert.calledOnce(res.end)
-        sinon.assert.calledWithExactly(res.end, '3\n')
-      }))
     })
 
     describe('#close()', () => {
-      it('closes the API server', (done) => {
+      it('closes the server', (done) => {
         api.close()
 
-        http.get('http://localhost:3000', (res) =>
+        http.get('http://localhost:3000', () =>
           done('Error: API server should be closed')
         ).on('error', () => done())
       })
@@ -134,23 +132,27 @@ describe('final', () => {
 
     describe('.options()', () => {
       it('returns options from the given request', () => {
-        assert.deepStrictEqual(final.API.options(req), { first: '1', second: '2' })
+        assert.deepStrictEqual(final.API.options(req), stringOptions)
       })
     })
 
     describe('#run()', () => {
       var res
 
-      beforeEach((done) => {
+      function run (done) {
         api.run()
         http.get(req.url, (thisRes) => {
           res = thisRes
           done()
         }).on('error', done)
-      })
+      }
+
+      it('runs its server for the given command', run)
 
       describe('response', () => {
-        it('has 200 status code', () => {
+        before(run)
+
+        it('has a 200 status code', () => {
           assert.strictEqual(res.statusCode, 200)
         })
 
@@ -158,7 +160,7 @@ describe('final', () => {
           assert.strictEqual(res.headers['content-type'], 'text/plain')
         })
 
-        it('has a body of "3"', (done) => {
+        it('has a body with a result', (done) => {
           res.on('data', (chunk) => {
             assert.strictEqual(chunk.toString('utf8'), '3\n')
             done()
@@ -190,14 +192,14 @@ describe('final', () => {
     })
 
     describe('.options()', () => {
-      it('returns args from argv', () => {
-        assert.deepStrictEqual(final.CLI.options(), { first: 1, second: 2 })
+      it('returns options from argv', () => {
+        assert.deepStrictEqual(final.CLI.options(), options)
       })
     })
 
     describe('#run()', () => {
       context('without the help flag', () => {
-        it('runs a cli for the given command', sinon.test(function () {
+        it('runs a cli for the given command that prints a result', sinon.test(function () {
           this.stub(console, 'log')
           cli.run()
 
@@ -209,7 +211,7 @@ describe('final', () => {
       context('with the help flag', () => {
         beforeEach(() => { process.argv = 'node cli.js --help'.split(' ') })
 
-        it('prints usage information')
+        it('runs a cli for the given command that prints usage information')
       })
     })
   })

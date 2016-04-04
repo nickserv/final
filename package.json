@@ -42,7 +42,9 @@
   },
   "standard": {
     "globals": [
+      "after",
       "afterEach",
+      "before",
       "beforeEach",
       "context",
       "describe",
