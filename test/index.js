@@ -69,7 +69,7 @@ describe('final', () => {
 
       context('for a command with required and optional options', () => {
         context('given empty options', () => {
-          it('throws an error', () => {
+          it('throws a ValidationError', () => {
             assert.throws(() => command.run({}), final.ValidationError)
           })
         })
@@ -81,7 +81,7 @@ describe('final', () => {
         })
 
         context('given only the optional option', () => {
-          it('throws an error', () => {
+          it('throws a ValidationError', () => {
             assert.throws(() => command.run({ second: 2 }), final.ValidationError)
           })
         })
@@ -93,7 +93,7 @@ describe('final', () => {
         })
 
         context('given an invalid option', () => {
-          it('throws an error', () => {
+          it('throws a ValidationError', () => {
             assert.throws(() => command.run({ first: 1, invalid: true }), final.ValidationError)
           })
         })
@@ -103,46 +103,46 @@ describe('final', () => {
     describe('#validate()', () => {
       context('for a command without options', () => {
         context('given empty options', () => {
-          it('returns true', () => {
-            assert.strictEqual(simpleCommand.validate([]), true)
+          it('returns no errors', () => {
+            assert.deepStrictEqual(simpleCommand.validate([]), [])
           })
         })
 
         context('given any option', () => {
-          it('returns true', () => {
-            assert.strictEqual(simpleCommand.validate(['extra']), true)
+          it('returns no errors', () => {
+            assert.deepStrictEqual(simpleCommand.validate(['extra']), [])
           })
         })
       })
 
       context('for a command with required and optional options', () => {
         context('given empty options', () => {
-          it('returns false', () => {
-            assert.strictEqual(command.validate([]), false)
+          it('returns a MissingOptionError', () => {
+            assert.deepStrictEqual(command.validate([]), [new final.MissingOptionError('first')])
           })
         })
 
         context('given only the required option', () => {
-          it('returns true', () => {
-            assert.strictEqual(command.validate(['first']), true)
+          it('returns no errors', () => {
+            assert.deepStrictEqual(command.validate(['first']), [])
           })
         })
 
         context('given only the optional option', () => {
-          it('returns false', () => {
-            assert.strictEqual(command.validate(['second']), false)
+          it('returns a MissingOptionError', () => {
+            assert.deepStrictEqual(command.validate(['second']), [new final.MissingOptionError('first')])
           })
         })
 
         context('given both options', () => {
-          it('returns true', () => {
-            assert.strictEqual(command.validate(['first', 'second']), true)
+          it('returns no errors', () => {
+            assert.deepStrictEqual(command.validate(['first', 'second']), [])
           })
         })
 
-        context('given an invalid option', () => {
-          it('returns false', () => {
-            assert.strictEqual(command.validate(['first', 'invalid']), false)
+        context('given the required option and an invalid option', () => {
+          it('returns an InvalidOptionError', () => {
+            assert.deepStrictEqual(command.validate(['first', 'invalid']), [new final.InvalidOptionError('invalid')])
           })
         })
       })

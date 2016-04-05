@@ -6,9 +6,32 @@ var path = require('path')
 var url = require('url')
 
 class ValidationError extends Error {
-  constructor () {
+  constructor (optionErrors) {
     super()
     this.name = 'ValidationError'
+    this.optionErrors = optionErrors
+  }
+}
+
+class OptionError extends Error {
+  constructor (option) {
+    super()
+    this.name = 'OptionError'
+    this.option = option
+  }
+}
+
+class InvalidOptionError extends OptionError {
+  constructor (option) {
+    super(option)
+    this.name = 'InvalidOptionError'
+  }
+}
+
+class MissingOptionError extends OptionError {
+  constructor (option) {
+    super(option)
+    this.name = 'MissingOptionError'
   }
 }
 
@@ -16,29 +39,38 @@ class Command {
   constructor (core, options) {
     this.core = core
     this.options = options
+    this.requiredOptionNames = _.keys(_.pickBy(this.options, 'required'))
+    this.optionNames = _.keys(this.options)
   }
 
-  static isSubset (subset, superset) {
-    return _.every(subset, (item) => _.includes(superset, item))
+  static createErrors (errors) {
+    function errorForEachOption (ErrorClass, optionNames) {
+      return _.map(optionNames, (optionName) => new ErrorClass(optionName))
+    }
+
+    return _.flatten(_.map(errors, (item) => errorForEachOption(item.Error, item.options)))
   }
 
   run (options) {
-    var optionNames = Object.keys(options)
-    if (!this.validate(optionNames)) throw new ValidationError()
+    var optionErrors = this.validate(Object.keys(options))
+    if (optionErrors.length) throw new ValidationError(optionErrors)
 
     return String(this.core(_.mapValues(options, String)))
   }
 
   validate (optionNames) {
-    if (!this.options) return true
+    if (!this.options) return []
 
-    var options = _.keys(this.options)
-    var requiredOptions = _.keys(_.pickBy(this.options, 'required'))
-
-    var meetsRequiredOptions = Command.isSubset(requiredOptions, optionNames)
-    var meetsAllowedOptions = Command.isSubset(optionNames, options)
-
-    return meetsRequiredOptions && meetsAllowedOptions
+    return Command.createErrors([
+      {
+        Error: MissingOptionError,
+        options: _.difference(this.requiredOptionNames, optionNames)
+      },
+      {
+        Error: InvalidOptionError,
+        options: _.difference(optionNames, this.optionNames)
+      }
+    ])
   }
 }
 
@@ -106,4 +138,4 @@ class CLI extends Runner {
   }
 }
 
-module.exports = { ValidationError, Command, Runner, API, CLI }
+module.exports = { InvalidOptionError, MissingOptionError, ValidationError, Command, Runner, API, CLI }
