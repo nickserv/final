@@ -107,24 +107,18 @@ class API extends Runner {
 
 class CLI extends Runner {
   help () {
-    if (this.helpText) {
-      return this.helpText
-    } else {
-      var helpOptions = { help: { description: 'output usage information' } }
-      var extendedOptions = _.extend(helpOptions, this.command.options)
+    var helpOptions = { help: { description: 'output usage information' } }
+    var extendedOptions = _.extend(helpOptions, this.command.options)
 
-      var options = _.map(extendedOptions, (option, name) => {
-        return `  --${_.padEnd(name, 19)}${option.description}`
-      }).join('\n')
+    var options = _.map(extendedOptions, (option, name) => {
+      return `  --${_.padEnd(name, 19)}${option.description}`
+    }).join('\n')
 
-      this.helpText = [
-        `Usage: ${path.basename(process.argv[1], '.js')} [options]`,
-        'Options:',
-        options
-      ].join('\n\n')
-
-      return this.helpText
-    }
+    return [
+      `Usage: ${path.basename(process.argv[1], '.js')} [options]`,
+      'Options:',
+      options
+    ].join('\n\n')
   }
 
   static options () {
