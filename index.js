@@ -43,12 +43,8 @@ class Command {
     this.optionNames = Command.getOptionNames(this.options)
   }
 
-  static createErrors (errors) {
-    function errorForEachOption (ErrorClass, optionNames) {
-      return _.map([...optionNames], (optionName) => new ErrorClass(optionName))
-    }
-
-    return new Set(_.flatten(_.map([...errors], (item) => errorForEachOption(item.Error, item.options))))
+  static createErrors (ErrorClass, optionNames) {
+    return [...optionNames].map((optionName) => new ErrorClass(optionName))
   }
 
   static difference (a, b) {
@@ -69,16 +65,13 @@ class Command {
   validate (optionNames) {
     if (!this.options) return new Set([])
 
-    return Command.createErrors(new Set([
-      {
-        Error: MissingOptionError,
-        options: Command.difference(this.requiredOptionNames, optionNames)
-      },
-      {
-        Error: InvalidOptionError,
-        options: Command.difference(optionNames, this.optionNames)
-      }
-    ]))
+    var missingOptions = Command.difference(this.requiredOptionNames, optionNames)
+    var invalidOptions = Command.difference(optionNames, this.optionNames)
+
+    return new Set(_.concat(
+      Command.createErrors(MissingOptionError, missingOptions),
+      Command.createErrors(InvalidOptionError, invalidOptions)
+    ))
   }
 }
 
