@@ -44,11 +44,11 @@ class Command {
   }
 
   static createErrors (ErrorClass, optionNames) {
-    return [...optionNames].map((optionName) => new ErrorClass(optionName))
+    return Array.from(optionNames).map((optionName) => new ErrorClass(optionName))
   }
 
   static difference (a, b) {
-    return new Set([...a].filter((x) => !b.has(x)))
+    return new Set(Array.from(a).filter((x) => !b.has(x)))
   }
 
   static getOptionNames (options) {
