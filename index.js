@@ -39,8 +39,8 @@ class Command {
   constructor (core, options) {
     this.core = core
     this.options = options
-    this.requiredOptionNames = new Set(_.keys(_.pickBy(this.options, 'required')))
-    this.optionNames = new Set(_.keys(this.options))
+    this.requiredOptionNames = Command.getOptionNames(_.pickBy(this.options, 'required'))
+    this.optionNames = Command.getOptionNames(this.options)
   }
 
   static createErrors (errors) {
@@ -55,8 +55,12 @@ class Command {
     return new Set([...a].filter((x) => !b.has(x)))
   }
 
+  static getOptionNames (options) {
+    return new Set(_.keys(options))
+  }
+
   run (options) {
-    var optionErrors = this.validate(new Set(Object.keys(options)))
+    var optionErrors = this.validate(Command.getOptionNames(options))
     if (optionErrors.size) throw new ValidationError(optionErrors)
 
     return String(this.core(_.mapValues(options, String)))
