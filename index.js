@@ -39,38 +39,42 @@ class Command {
   constructor (core, options) {
     this.core = core
     this.options = options
-    this.requiredOptionNames = _.keys(_.pickBy(this.options, 'required'))
-    this.optionNames = _.keys(this.options)
+    this.requiredOptionNames = new Set(_.keys(_.pickBy(this.options, 'required')))
+    this.optionNames = new Set(_.keys(this.options))
   }
 
   static createErrors (errors) {
     function errorForEachOption (ErrorClass, optionNames) {
-      return _.map(optionNames, (optionName) => new ErrorClass(optionName))
+      return _.map([...optionNames], (optionName) => new ErrorClass(optionName))
     }
 
-    return _.flatten(_.map(errors, (item) => errorForEachOption(item.Error, item.options)))
+    return new Set(_.flatten(_.map([...errors], (item) => errorForEachOption(item.Error, item.options))))
+  }
+
+  static difference (a, b) {
+    return new Set([...a].filter((x) => !b.has(x)))
   }
 
   run (options) {
-    var optionErrors = this.validate(Object.keys(options))
-    if (optionErrors.length) throw new ValidationError(optionErrors)
+    var optionErrors = this.validate(new Set(Object.keys(options)))
+    if (optionErrors.size) throw new ValidationError(optionErrors)
 
     return String(this.core(_.mapValues(options, String)))
   }
 
   validate (optionNames) {
-    if (!this.options) return []
+    if (!this.options) return new Set([])
 
-    return Command.createErrors([
+    return Command.createErrors(new Set([
       {
         Error: MissingOptionError,
-        options: _.difference(this.requiredOptionNames, optionNames)
+        options: Command.difference(this.requiredOptionNames, optionNames)
       },
       {
         Error: InvalidOptionError,
-        options: _.difference(optionNames, this.optionNames)
+        options: Command.difference(optionNames, this.optionNames)
       }
-    ])
+    ]))
   }
 }
 
