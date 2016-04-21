@@ -10,12 +10,12 @@
   "devDependencies": {
     "codeclimate-test-reporter": "^0.3.1",
     "istanbul": "^0.4.2",
-    "mocha": "^2.3.4",
+    "jasmine": "^2.4.1",
     "sinon": "^1.17.2",
     "standard": "^6.0.8"
   },
   "scripts": {
-    "cover": "istanbul cover _mocha",
+    "cover": "istanbul cover jasmine",
     "lint": "standard",
     "test": "npm run cover && npm run lint"
   },

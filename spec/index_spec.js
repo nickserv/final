@@ -43,7 +43,7 @@ describe('final', () => {
     var req = new http.IncomingMessage()
     req.url = 'http://localhost:3000?first=1&second=2'
 
-    after(() => api.close())
+    afterEach(() => api.close())
 
     describe('constructor', () => {
       it('creates a server', () => {
@@ -91,7 +91,7 @@ describe('final', () => {
       it('runs its server for the given command', run)
 
       describe('response', () => {
-        before(run)
+        beforeEach(run)
 
         it('has a 200 status code', () => {
           assert.strictEqual(res.statusCode, 200)
