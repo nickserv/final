@@ -6,25 +6,145 @@ var http = require('http')
 var sinon = require('sinon')
 
 describe('final', () => {
-  function core (options) {
-    return _.parseInt(options.first) + _.parseInt(options.second)
+  var commandCore = (options) => {
+    return _.parseInt(options.first) + (_.parseInt(options.second) || 0)
   }
 
-  var command = new final.Command(core)
+  var commandOptions = {
+    first: {
+      description: 'first number to add',
+      required: true
+    },
+    second: {
+      description: 'second number to add'
+    }
+  }
+
+  var command = new final.Command(commandCore, commandOptions)
 
   var options = { first: 1, second: 2 }
   var stringOptions = _.mapValues(options, String)
 
   describe('Command', () => {
+    var greeting = 'Hello, world!'
+    var simpleCommandCore = () => greeting
+    var simpleCommand = new final.Command(simpleCommandCore)
+
     describe('constructor', () => {
-      it('uses the given core', () => {
-        assert.strictEqual(command.core, core)
+      context('for a command without options', () => {
+        it('uses the given core', () => {
+          assert.strictEqual(simpleCommand.core, simpleCommandCore)
+        })
+
+        it('doesn\'t use any options', () => {
+          assert.strictEqual(simpleCommand.options, undefined)
+        })
+      })
+
+      context('for a command with required and optional options', () => {
+        it('uses the given core', () => {
+          assert.strictEqual(command.core, commandCore)
+        })
+
+        it('uses the given options', () => {
+          assert.deepStrictEqual(command.options, commandOptions)
+        })
       })
     })
 
     describe('#run()', () => {
-      it('returns a String result', () => {
-        assert.strictEqual(command.run(options), '3')
+      context('for a command without options', () => {
+        context('given empty options', () => {
+          it('returns a String result', () => {
+            assert.strictEqual(simpleCommand.run({}), greeting)
+          })
+        })
+
+        context('given any option', () => {
+          it('returns a String result', () => {
+            assert.strictEqual(simpleCommand.run({ extra: true }), greeting)
+          })
+        })
+      })
+
+      context('for a command with required and optional options', () => {
+        context('given empty options', () => {
+          it('throws a ValidationError', () => {
+            assert.throws(() => command.run({}), final.ValidationError)
+          })
+        })
+
+        context('given only the required option', () => {
+          it('returns a String result', () => {
+            assert.strictEqual(command.run({ first: 1 }), '1')
+          })
+        })
+
+        context('given only the optional option', () => {
+          it('throws a ValidationError', () => {
+            assert.throws(() => command.run({ second: 2 }), final.ValidationError)
+          })
+        })
+
+        context('given both options', () => {
+          it('returns a String result', () => {
+            assert.strictEqual(command.run(options), '3')
+          })
+        })
+
+        context('given an invalid option', () => {
+          it('throws a ValidationError', () => {
+            assert.throws(() => command.run({ first: 1, invalid: true }), final.ValidationError)
+          })
+        })
+      })
+    })
+
+    describe('#validate()', () => {
+      context('for a command without options', () => {
+        context('given empty options', () => {
+          it('returns no errors', () => {
+            assert.deepStrictEqual(simpleCommand.validate(new Set([])), new Set([]))
+          })
+        })
+
+        context('given any option', () => {
+          it('returns no errors', () => {
+            assert.deepStrictEqual(simpleCommand.validate(new Set(['extra'])), new Set([]))
+          })
+        })
+      })
+
+      context('for a command with required and optional options', () => {
+        context('given empty options', () => {
+          it('returns a MissingOptionError', () => {
+            assert.deepStrictEqual(command.validate(new Set([])), new Set([new final.MissingOptionError('first')]))
+          })
+        })
+
+        context('given only the required option', () => {
+          it('returns no errors', () => {
+            assert.deepStrictEqual(command.validate(new Set(['first'])), new Set([]))
+          })
+        })
+
+        context('given only the optional option', () => {
+          it('returns a MissingOptionError', () => {
+            assert.deepStrictEqual(command.validate(new Set(['second'])), new Set([new final.MissingOptionError('first')]))
+          })
+        })
+
+        context('given both options', () => {
+          it('returns no errors', () => {
+            assert.deepStrictEqual(command.validate(new Set(['first', 'second'])), new Set([]))
+          })
+        })
+
+        context('given the required option and an invalid option', () => {
+          it('returns an InvalidOptionError', () => {
+            assert.deepStrictEqual(command.validate(new Set(['first', 'invalid'])), new Set([new final.InvalidOptionError('invalid')]))
+          })
+        })
       })
     })
   })
@@ -112,8 +232,27 @@ describe('final', () => {
   })
 
   describe('CLI', () => {
+    var args
     var cli = new final.CLI(command)
-    process.argv = 'node cli.js --first 1 --second 2'.split(' ')
+
+    before(() => { args = 'node cli.js --first 1 --second 2' })
+    beforeEach(() => { process.argv = args.split(' ') })
+
+    describe('#help()', () => {
+      it('returns formatted help text', () => {
+        var expected = [
+          'Usage: cli [options]',
+          '',
+          'Options:',
+          '',
+          '  --help               output usage information',
+          '  --first              first number to add',
+          '  --second             second number to add'
+        ].join('\n')
+
+        assert.strictEqual(cli.help(), expected)
+      })
+    })
 
     describe('.options()', () => {
       it('returns options from argv', () => {
@@ -122,13 +261,21 @@ describe('final', () => {
     })
 
     describe('#run()', () => {
-      it('runs a cli for the given command that prints a result', sinon.test(function () {
-        this.stub(console, 'log')
-        cli.run()
+      context('without the help flag', () => {
+        it('runs a cli for the given command that prints a result', sinon.test(function () {
+          this.stub(console, 'log')
+          cli.run()
 
-        sinon.assert.calledOnce(console.log)
-        sinon.assert.calledWithExactly(console.log, '3')
-      }))
+          sinon.assert.calledOnce(console.log)
+          sinon.assert.calledWithExactly(console.log, '3')
+        }))
+      })
+
+      context('with the help flag', () => {
+        before(() => { args = 'node cli.js --help' })
+
+        it('runs a cli for the given command that prints usage information')
+      })
     })
   })
 })
