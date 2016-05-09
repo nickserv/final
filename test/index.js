@@ -193,7 +193,7 @@ describe('final', () => {
 
     describe('.options()', () => {
       it('returns options from the given request', () => {
-        assert.deepStrictEqual(final.API.options(req), stringOptions)
+        assert.deepEqual(final.API.options(req), stringOptions)
       })
     })
 
