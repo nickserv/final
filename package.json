@@ -47,7 +47,10 @@
       "beforeEach",
       "context",
       "describe",
-      "it"
+      "expect",
+      "it",
+      "jasmine",
+      "spyOn"
     ]
   }
 }
