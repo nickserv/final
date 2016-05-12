@@ -1,9 +1,7 @@
 'use strict'
 var _ = require('lodash')
-var assert = require('assert')
 var final = require('..')
 var http = require('http')
-var sinon = require('sinon')
 
 describe('final', () => {
   function core (options) {
@@ -18,13 +16,13 @@ describe('final', () => {
   describe('Command', () => {
     describe('constructor', () => {
       it('uses the given core', () => {
-        assert.strictEqual(command.core, core)
+        expect(command.core).toBe(core)
       })
     })
 
     describe('#run()', () => {
       it('returns a String result', () => {
-        assert.strictEqual(command.run(options), '3')
+        expect(command.run(options)).toBe('3')
       })
     })
   })
@@ -32,7 +30,7 @@ describe('final', () => {
   describe('Runner', () => {
     describe('constructor', () => {
       it('uses the given command', () => {
-        assert.strictEqual(new final.Runner(command).command, command)
+        expect(new final.Runner(command).command).toBe(command)
       })
     })
   })
@@ -47,17 +45,17 @@ describe('final', () => {
 
     describe('constructor', () => {
       it('creates a server', () => {
-        assert(api.server instanceof http.Server)
+        expect(api.server instanceof http.Server)
       })
     })
 
     describe('#callback()', () => {
       it('is a function', () => {
-        assert(api.callback instanceof Function)
+        expect(api.callback instanceof Function)
       })
 
       it('takes a request and a response', () => {
-        assert.strictEqual(api.callback.length, 2)
+        expect(api.callback.length).toBe(2)
       })
     })
 
@@ -73,7 +71,9 @@ describe('final', () => {
 
     describe('.options()', () => {
       it('returns options from the given request', () => {
-        assert.deepEqual(final.API.options(req), stringOptions)
+        var objectContainingOptions = jasmine.objectContaining(stringOptions)
+
+        expect(final.API.options(req)).toEqual(objectContainingOptions)
       })
     })
 
@@ -94,16 +94,16 @@ describe('final', () => {
         beforeEach(run)
 
         it('has a 200 status code', () => {
-          assert.strictEqual(res.statusCode, 200)
+          expect(res.statusCode).toBe(200)
         })
 
         it('has a text/plain content type', () => {
-          assert.strictEqual(res.headers['content-type'], 'text/plain')
+          expect(res.headers['content-type']).toBe('text/plain')
         })
 
         it('has a body with a result', (done) => {
           res.on('data', (chunk) => {
-            assert.strictEqual(chunk.toString('utf8'), '3\n')
+            expect(chunk.toString('utf8')).toBe('3\n')
             done()
           })
         })
@@ -117,18 +117,18 @@ describe('final', () => {
 
     describe('.options()', () => {
       it('returns options from argv', () => {
-        assert.deepStrictEqual(final.CLI.options(), options)
+        expect(final.CLI.options()).toEqual(options)
       })
     })
 
     describe('#run()', () => {
-      it('runs a cli for the given command that prints a result', sinon.test(function () {
-        this.stub(console, 'log')
+      it('runs a cli for the given command that prints a result', () => {
+        spyOn(console, 'log')
         cli.run()
 
-        sinon.assert.calledOnce(console.log)
-        sinon.assert.calledWithExactly(console.log, '3')
-      }))
+        expect(console.log).toHaveBeenCalledTimes(1)
+        expect(console.log).toHaveBeenCalledWith('3')
+      })
     })
   })
 })

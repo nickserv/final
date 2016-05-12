@@ -11,7 +11,6 @@
     "codeclimate-test-reporter": "^0.3.1",
     "istanbul": "^0.4.2",
     "jasmine": "^2.4.1",
-    "sinon": "^1.17.2",
     "standard": "^6.0.8"
   },
   "scripts": {
