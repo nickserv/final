@@ -101,40 +101,46 @@ describe('final', () => {
     })
 
     describe('#validate()', () => {
-      context('for a command without options', () => {
-        context('given empty options', () => {
+      context('for a command with no options', () => {
+        context('given no options', () => {
           it('returns no errors', () => {
             assert.deepStrictEqual(simpleCommand.validate(new Set([])), new Set([]))
           })
         })
 
-        context('given any option', () => {
+        context('given an option', () => {
           it('returns no errors', () => {
             assert.deepStrictEqual(simpleCommand.validate(new Set(['extra'])), new Set([]))
           })
         })
       })
 
-      context('for a command with required and optional options', () => {
-        context('given empty options', () => {
+      context('for a command with a required option and an optional option', () => {
+        context('given no options', () => {
           it('returns a MissingOptionError', () => {
             assert.deepStrictEqual(command.validate(new Set([])), new Set([new final.MissingOptionError('first')]))
           })
         })
 
-        context('given only the required option', () => {
+        context('given the required option', () => {
           it('returns no errors', () => {
             assert.deepStrictEqual(command.validate(new Set(['first'])), new Set([]))
           })
         })
 
-        context('given only the optional option', () => {
+        context('given the optional option', () => {
           it('returns a MissingOptionError', () => {
             assert.deepStrictEqual(command.validate(new Set(['second'])), new Set([new final.MissingOptionError('first')]))
           })
         })
 
-        context('given both options', () => {
+        context('given an invalid option', () => {
+          it('returns a MissingOptionError and an InvalidOptionError', () => {
+            assert.deepStrictEqual(command.validate(new Set(['invalid'])), new Set([new final.MissingOptionError('first'), new final.InvalidOptionError('invalid')]))
+          })
+        })
+
+        context('given the required option and the optional option', () => {
           it('returns no errors', () => {
             assert.deepStrictEqual(command.validate(new Set(['first', 'second'])), new Set([]))
           })
@@ -143,6 +149,18 @@ describe('final', () => {
         context('given the required option and an invalid option', () => {
           it('returns an InvalidOptionError', () => {
             assert.deepStrictEqual(command.validate(new Set(['first', 'invalid'])), new Set([new final.InvalidOptionError('invalid')]))
+          })
+        })
+
+        context('given the optional option and an invalid option', () => {
+          it('returns a MissingOptionError and an InvalidOptionError', () => {
+            assert.deepStrictEqual(command.validate(new Set(['second', 'invalid'])), new Set([new final.MissingOptionError('first'), new final.InvalidOptionError('invalid')]))
+          })
+        })
+
+        context('given the required option, the optional option, and an invalid option', () => {
+          it('returns an InvalidOptionError', () => {
+            assert.deepStrictEqual(command.validate(new Set(['first', 'second', 'invalid'])), new Set([new final.InvalidOptionError('invalid')]))
           })
         })
       })
