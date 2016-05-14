@@ -2,7 +2,9 @@
 var _ = require('lodash')
 var assert = require('assert')
 var final = require('..')
+var fs = require('fs')
 var http = require('http')
+var path = require('path')
 var sinon = require('sinon')
 
 describe('final', () => {
@@ -277,17 +279,9 @@ describe('final', () => {
 
     describe('#help()', () => {
       it('returns formatted help text', () => {
-        var expected = [
-          'Usage: cli [options]',
-          '',
-          'Options:',
-          '',
-          '  --help               output usage information',
-          '  --first              first number to add',
-          '  --second             second number to add'
-        ].join('\n')
-
-        assert.strictEqual(cli.help(), expected)
+        var helpTextPath = path.join(__dirname, 'help.txt')
+        var helpText = fs.readFileSync(helpTextPath, 'utf-8').trim()
+        assert.strictEqual(cli.help(), helpText)
       })
     })
 

@@ -1,0 +1,7 @@
+Usage: cli [options]
+
+Options:
+
+  --help               output usage information
+  --first              first number to add
+  --second             second number to add
