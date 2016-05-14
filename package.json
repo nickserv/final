@@ -8,6 +8,7 @@
     "minimist": "^1.2.0"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
     "codeclimate-test-reporter": "^0.3.1",
     "istanbul": "^0.4.2",
     "mocha": "^2.3.4",
