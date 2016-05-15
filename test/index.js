@@ -5,7 +5,9 @@ var final = require('..')
 var fs = require('fs')
 var http = require('http')
 var path = require('path')
+var request = require('supertest')
 var sinon = require('sinon')
+var url = require('url')
 
 describe('final', () => {
   var commandCore = (options) => {
@@ -201,6 +203,7 @@ describe('final', () => {
 
     var req = new http.IncomingMessage()
     req.url = 'http://localhost:3000?first=1&second=2'
+    var parsedReq = url.parse(req.url)
 
     after(() => api.close())
 
@@ -220,13 +223,25 @@ describe('final', () => {
       })
     })
 
+    describe('#server', () => {
+      it('responds with a result', (done) => {
+        request(api.server)
+          .get(parsedReq.path)
+          .expect(200, '3\n')
+          .expect('content-type', 'text/plain')
+          .end(done)
+      })
+    })
+
     describe('#close()', () => {
       it('closes the server', (done) => {
         api.close()
 
-        http.get('http://localhost:3000', () =>
-          done('Error: API server should be closed')
-        ).on('error', () => done())
+        request(parsedReq.host)
+          .get(parsedReq.path)
+          .end((err) => {
+            err ? done() : done('Error: API server should be closed')
+          })
       })
     })
 
@@ -237,35 +252,12 @@ describe('final', () => {
     })
 
     describe('#run()', () => {
-      var res
-
-      function run (done) {
+      it('runs its server for the given command', (done) => {
         api.run()
-        http.get(req.url, (thisRes) => {
-          res = thisRes
-          done()
-        }).on('error', done)
-      }
 
-      it('runs its server for the given command', run)
-
-      describe('response', () => {
-        before(run)
-
-        it('has a 200 status code', () => {
-          assert.strictEqual(res.statusCode, 200)
-        })
-
-        it('has a text/plain content type', () => {
-          assert.strictEqual(res.headers['content-type'], 'text/plain')
-        })
-
-        it('has a body with a result', (done) => {
-          res.on('data', (chunk) => {
-            assert.strictEqual(chunk.toString('utf8'), '3\n')
-            done()
-          })
-        })
+        request(parsedReq.host)
+          .get(parsedReq.path)
+          .end(done)
       })
     })
   })
