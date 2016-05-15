@@ -117,12 +117,17 @@ class CLI extends Runner {
   help () {
     var programName = path.basename(process.argv[1], '.js')
     var helpOption = { help: { description: 'output usage information' } }
-    var options = _.extend(helpOption, this.command.options)
+    var options = this.command.options
+    var required = _.pickBy(options, (option) => option.required)
+    var optional = _.pickBy(options, (option) => !option.required)
+    optional = _.extend(helpOption, optional)
 
     return [
-      `Usage: ${programName} [options]`,
-      'Options:',
-      CLI.formatOptions(options)
+      `Usage: ${programName} <required> [optional]`,
+      'Required:',
+      CLI.formatOptions(required),
+      'Optional:',
+      CLI.formatOptions(optional)
     ].join('\n\n')
   }
 
