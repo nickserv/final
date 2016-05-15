@@ -9,6 +9,8 @@ var request = require('supertest')
 var sinon = require('sinon')
 var url = require('url')
 
+sinon.assert.expose(assert, { prefix: '' })
+
 describe('final', () => {
   var commandCore = (options) => {
     return _.parseInt(options.first) + (_.parseInt(options.second) || 0)
@@ -320,18 +322,18 @@ describe('final', () => {
       context('given valid options', () => {
         it('runs a cli for the given command that prints a result', sinon.test(function () {
           setup(this)
-          sinon.assert.notCalled(cli.help)
-          sinon.assert.notCalled(console.error)
-          sinon.assert.calledOnce(console.log)
-          sinon.assert.calledWithExactly(console.log, '3')
+          assert.notCalled(cli.help)
+          assert.notCalled(console.error)
+          assert.calledOnce(console.log)
+          assert.calledWithExactly(console.log, '3')
         }))
       })
 
       function itDisplaysHelp () {
         it('displays help', sinon.test(function () {
           setup(this)
-          sinon.assert.calledOnce(cli.help)
-          sinon.assert.calledWithExactly(cli.help)
+          assert.calledOnce(cli.help)
+          assert.calledWithExactly(cli.help)
         }))
       }
 
@@ -342,9 +344,9 @@ describe('final', () => {
           setup(this)
           var expected = 'Error: Missing required option "first"\n' +
                          'Error: Invalid option "invalid"'
-          sinon.assert.calledOnce(console.error)
-          sinon.assert.calledWithExactly(console.error, expected)
-          sinon.assert.called(console.log)
+          assert.calledOnce(console.error)
+          assert.calledWithExactly(console.error, expected)
+          assert.called(console.log)
         }))
 
         itDisplaysHelp()
