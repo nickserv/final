@@ -2,8 +2,12 @@
 var _ = require('lodash')
 var assert = require('chai').assert
 var final = require('..')
+var fs = require('fs')
 var http = require('http')
+var path = require('path')
+var request = require('supertest')
 var sinon = require('sinon')
+var url = require('url')
 
 describe('final', () => {
   var commandCore = (options) => {
@@ -101,16 +105,21 @@ describe('final', () => {
     })
 
     describe('#validate()', () => {
+      function assertValidationErrors (command, options, expected) {
+        var actual = command.validate(new Set(options))
+        assert.deepEqual(actual, new Set(expected))
+      }
+
       context('for a command with no options', () => {
         context('given no options', () => {
           it('returns no errors', () => {
-            assert.deepEqual(simpleCommand.validate(new Set([])), new Set([]))
+            assertValidationErrors(simpleCommand, [], [])
           })
         })
 
         context('given an option', () => {
           it('returns no errors', () => {
-            assert.deepEqual(simpleCommand.validate(new Set(['extra'])), new Set([]))
+            assertValidationErrors(simpleCommand, ['extra'], [])
           })
         })
       })
@@ -118,49 +127,63 @@ describe('final', () => {
       context('for a command with a required option and an optional option', () => {
         context('given no options', () => {
           it('returns a MissingOptionError', () => {
-            assert.deepEqual(command.validate(new Set([])), new Set([new final.MissingOptionError('first')]))
+            assertValidationErrors(command, [], [
+              new final.MissingOptionError('first')
+            ])
           })
         })
 
         context('given the required option', () => {
           it('returns no errors', () => {
-            assert.deepEqual(command.validate(new Set(['first'])), new Set([]))
+            assertValidationErrors(command, ['first'], [])
           })
         })
 
         context('given the optional option', () => {
           it('returns a MissingOptionError', () => {
-            assert.deepEqual(command.validate(new Set(['second'])), new Set([new final.MissingOptionError('first')]))
+            assertValidationErrors(command, ['second'], [
+              new final.MissingOptionError('first')
+            ])
           })
         })
 
         context('given an invalid option', () => {
           it('returns a MissingOptionError and an InvalidOptionError', () => {
-            assert.deepEqual(command.validate(new Set(['invalid'])), new Set([new final.MissingOptionError('first'), new final.InvalidOptionError('invalid')]))
+            assertValidationErrors(command, ['invalid'], [
+              new final.MissingOptionError('first'),
+              new final.InvalidOptionError('invalid')
+            ])
           })
         })
 
         context('given the required option and the optional option', () => {
           it('returns no errors', () => {
-            assert.deepEqual(command.validate(new Set(['first', 'second'])), new Set([]))
+            assertValidationErrors(command, ['first', 'second'], [])
           })
         })
 
         context('given the required option and an invalid option', () => {
           it('returns an InvalidOptionError', () => {
-            assert.deepEqual(command.validate(new Set(['first', 'invalid'])), new Set([new final.InvalidOptionError('invalid')]))
+            assertValidationErrors(command, ['first', 'invalid'], [
+              new final.InvalidOptionError('invalid')
+            ])
           })
         })
 
         context('given the optional option and an invalid option', () => {
           it('returns a MissingOptionError and an InvalidOptionError', () => {
-            assert.deepEqual(command.validate(new Set(['second', 'invalid'])), new Set([new final.MissingOptionError('first'), new final.InvalidOptionError('invalid')]))
+            assertValidationErrors(command, ['second', 'invalid'], [
+              new final.MissingOptionError('first'),
+              new final.InvalidOptionError('invalid')
+            ])
           })
         })
 
         context('given the required option, the optional option, and an invalid option', () => {
           it('returns an InvalidOptionError', () => {
-            assert.deepEqual(command.validate(new Set(['first', 'second', 'invalid'])), new Set([new final.InvalidOptionError('invalid')]))
+            assertValidationErrors(command, ['first', 'second', 'invalid'], [
+              new final.InvalidOptionError('invalid')
+            ])
           })
         })
       })
@@ -180,6 +203,7 @@ describe('final', () => {
 
     var req = new http.IncomingMessage()
     req.url = 'http://localhost:3000?first=1&second=2'
+    var parsedReq = url.parse(req.url)
 
     after(() => api.close())
 
@@ -199,13 +223,48 @@ describe('final', () => {
       })
     })
 
+    describe('#server', () => {
+      context('given valid options', () => {
+        it('responds with a result', (done) => {
+          request(api.server)
+            .get(parsedReq.path)
+            .expect(200, '3\n')
+            .expect('content-type', 'text/plain')
+            .end(done)
+        })
+      })
+
+      context('given invalid options', () => {
+        it('responds with validation errors', (done) => {
+          request(api.server)
+            .get('?invalid')
+            .expect(403, {
+              errors: [
+                {
+                  name: 'MissingOptionError',
+                  option: 'first'
+                },
+                {
+                  name: 'InvalidOptionError',
+                  option: 'invalid'
+                }
+              ]
+            })
+            .expect('content-type', 'application/json')
+            .end(done)
+        })
+      })
+    })
+
     describe('#close()', () => {
       it('closes the server', (done) => {
         api.close()
 
-        http.get('http://localhost:3000', () =>
-          done('Error: API server should be closed')
-        ).on('error', () => done())
+        request(parsedReq.host)
+          .get(parsedReq.path)
+          .end((err) => {
+            err ? done() : done('Error: API server should be closed')
+          })
       })
     })
 
@@ -216,35 +275,12 @@ describe('final', () => {
     })
 
     describe('#run()', () => {
-      var res
-
-      function run (done) {
+      it('runs its server for the given command', (done) => {
         api.run()
-        http.get(req.url, (thisRes) => {
-          res = thisRes
-          done()
-        }).on('error', done)
-      }
 
-      it('runs its server for the given command', run)
-
-      describe('response', () => {
-        before(run)
-
-        it('has a 200 status code', () => {
-          assert.strictEqual(res.statusCode, 200)
-        })
-
-        it('has a text/plain content type', () => {
-          assert.strictEqual(res.headers['content-type'], 'text/plain')
-        })
-
-        it('has a body with a result', (done) => {
-          res.on('data', (chunk) => {
-            assert.strictEqual(chunk.toString('utf8'), '3\n')
-            done()
-          })
-        })
+        request(parsedReq.host)
+          .get(parsedReq.path)
+          .end(done)
       })
     })
   })
@@ -258,17 +294,9 @@ describe('final', () => {
 
     describe('#help()', () => {
       it('returns formatted help text', () => {
-        var expected = [
-          'Usage: cli [options]',
-          '',
-          'Options:',
-          '',
-          '  --help               output usage information',
-          '  --first              first number to add',
-          '  --second             second number to add'
-        ].join('\n')
-
-        assert.strictEqual(cli.help(), expected)
+        var helpTextPath = path.join(__dirname, 'help.txt')
+        var helpText = fs.readFileSync(helpTextPath, 'utf-8').trim()
+        assert.strictEqual(cli.help(), helpText)
       })
     })
 
@@ -279,20 +307,53 @@ describe('final', () => {
     })
 
     describe('#run()', () => {
-      context('without the help flag', () => {
-        it('runs a cli for the given command that prints a result', sinon.test(function () {
-          this.stub(console, 'log')
-          cli.run()
+      // Sets up stubs for tests that would produce console output. This can't
+      // be in a beforeEach() hook because the console stubs would hide mocha's
+      // command line results.
+      function setup (sandbox) {
+        sandbox.stub(cli, 'help')
+        sandbox.stub(console, 'error')
+        sandbox.stub(console, 'log')
+        cli.run()
+      }
 
+      context('given valid options', () => {
+        it('runs a cli for the given command that prints a result', sinon.test(function () {
+          setup(this)
+          sinon.assert.notCalled(cli.help)
+          sinon.assert.notCalled(console.error)
           sinon.assert.calledOnce(console.log)
           sinon.assert.calledWithExactly(console.log, '3')
         }))
       })
 
-      context('with the help flag', () => {
+      function itDisplaysHelp () {
+        it('displays help', sinon.test(function () {
+          setup(this)
+          sinon.assert.calledOnce(cli.help)
+          sinon.assert.calledWithExactly(cli.help)
+        }))
+      }
+
+      context('given invalid options', () => {
+        before(() => { args = 'node cli.js --invalid' })
+
+        it('displays validation errors and help', sinon.test(function () {
+          setup(this)
+          var expected = 'Error: Missing required option "first"\n' +
+                         'Error: Invalid option "invalid"'
+          sinon.assert.calledOnce(console.error)
+          sinon.assert.calledWithExactly(console.error, expected)
+          sinon.assert.called(console.log)
+        }))
+
+        itDisplaysHelp()
+      })
+
+      context('given the help flag', () => {
         before(() => { args = 'node cli.js --help' })
 
-        it('runs a cli for the given command that prints usage information')
+        itDisplaysHelp()
       })
     })
   })

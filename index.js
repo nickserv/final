@@ -11,6 +11,20 @@ class ValidationError extends Error {
     this.name = 'ValidationError'
     this.optionErrors = optionErrors
   }
+
+  mapOptionErrors (callback) {
+    return Array.from(this.optionErrors.values()).map(callback)
+  }
+
+  toJSON () {
+    return {
+      errors: this.mapOptionErrors((e) => e.toJSON())
+    }
+  }
+
+  toText () {
+    return this.mapOptionErrors((e) => e.toText()).join('\n')
+  }
 }
 
 class OptionError extends Error {
@@ -19,6 +33,13 @@ class OptionError extends Error {
     this.name = 'OptionError'
     this.option = option
   }
+
+  toJSON () {
+    return {
+      name: this.name,
+      option: this.option
+    }
+  }
 }
 
 class InvalidOptionError extends OptionError {
@@ -26,12 +47,20 @@ class InvalidOptionError extends OptionError {
     super(option)
     this.name = 'InvalidOptionError'
   }
+
+  toText () {
+    return `Error: Invalid option "${this.option}"`
+  }
 }
 
 class MissingOptionError extends OptionError {
   constructor (option) {
     super(option)
     this.name = 'MissingOptionError'
+  }
+
+  toText () {
+    return `Error: Missing required option "${this.option}"`
   }
 }
 
@@ -88,9 +117,22 @@ class API extends Runner {
   }
 
   callback (req, res) {
-    res.setHeader('content-type', 'text/plain')
-    res.writeHead(200)
-    res.end(`${this.command.run(API.options(req))}\n`)
+    try {
+      var body = `${this.command.run(API.options(req))}\n`
+      res.setHeader('content-type', 'text/plain')
+      res.writeHead(200)
+      res.end(body)
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        body = JSON.stringify(e.toJSON())
+        res.setHeader('content-type', 'application/json')
+        res.writeHead(403)
+      } else {
+        throw e
+      }
+    } finally {
+      res.end(body)
+    }
   }
 
   close () {
@@ -107,18 +149,27 @@ class API extends Runner {
 }
 
 class CLI extends Runner {
-  help () {
-    var helpOptions = { help: { description: 'output usage information' } }
-    var extendedOptions = _.extend(helpOptions, this.command.options)
+  static formatOptions (options) {
+    return _.chain(options)
+      .map((option, name) => `  --${_.padEnd(name, 19)}${option.description}`)
+      .join('\n')
+      .value()
+  }
 
-    var options = _.map(extendedOptions, (option, name) => {
-      return `  --${_.padEnd(name, 19)}${option.description}`
-    }).join('\n')
+  help () {
+    var programName = path.basename(process.argv[1], '.js')
+    var helpOption = { help: { description: 'output usage information' } }
+    var options = this.command.options
+    var required = _.pickBy(options, (option) => option.required)
+    var optional = _.pickBy(options, (option) => !option.required)
+    optional = _.extend(helpOption, optional)
 
     return [
-      `Usage: ${path.basename(process.argv[1], '.js')} [options]`,
-      'Options:',
-      options
+      `Usage: ${programName} <required> [optional]`,
+      'Required:',
+      CLI.formatOptions(required),
+      'Optional:',
+      CLI.formatOptions(optional)
     ].join('\n\n')
   }
 
@@ -129,7 +180,17 @@ class CLI extends Runner {
 
   run () {
     var options = CLI.options()
-    console.log(options.help ? this.help() : this.command.run(options))
+    try {
+      console.log(options.help ? this.help() : this.command.run(options))
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        console.error(e.toText())
+        console.log()
+        console.log(this.help())
+      } else {
+        throw e
+      }
+    }
   }
 }
 
