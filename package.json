@@ -4,14 +4,14 @@
   "description": "A set of tools for writing JavaScript code once that runs on the command line, browser, and more.",
   "main": "index.js",
   "dependencies": {
-    "lodash": "^4.6.1",
+    "lodash": "^4.12.0",
     "minimist": "^1.2.0"
   },
   "devDependencies": {
     "codeclimate-test-reporter": "^0.3.1",
-    "istanbul": "^0.4.2",
-    "mocha": "^2.3.4",
-    "sinon": "^1.17.2",
+    "istanbul": "^0.4.3",
+    "mocha": "^2.4.5",
+    "sinon": "^1.17.4",
     "standard": "^7.0.1",
     "supertest": "^1.2.0"
   },
