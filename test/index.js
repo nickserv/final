@@ -224,12 +224,35 @@ describe('final', () => {
     })
 
     describe('#server', () => {
-      it('responds with a result', (done) => {
-        request(api.server)
-          .get(parsedReq.path)
-          .expect(200, '3\n')
-          .expect('content-type', 'text/plain')
-          .end(done)
+      context('given valid options', () => {
+        it('responds with a result', (done) => {
+          request(api.server)
+            .get(parsedReq.path)
+            .expect(200, '3\n')
+            .expect('content-type', 'text/plain')
+            .end(done)
+        })
+      })
+
+      context('given invalid options', () => {
+        it('responds with validation errors', (done) => {
+          request(api.server)
+            .get('?invalid')
+            .expect(403, {
+              errors: [
+                {
+                  name: 'MissingOptionError',
+                  option: 'first'
+                },
+                {
+                  name: 'InvalidOptionError',
+                  option: 'invalid'
+                }
+              ]
+            })
+            .expect('content-type', 'application/json')
+            .end(done)
+        })
       })
     })
 

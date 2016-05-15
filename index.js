@@ -11,6 +11,12 @@ class ValidationError extends Error {
     this.name = 'ValidationError'
     this.optionErrors = optionErrors
   }
+
+  toJSON () {
+    return {
+      errors: Array.from(this.optionErrors.values()).map((e) => e.toJSON())
+    }
+  }
 }
 
 class OptionError extends Error {
@@ -18,6 +24,13 @@ class OptionError extends Error {
     super()
     this.name = 'OptionError'
     this.option = option
+  }
+
+  toJSON () {
+    return {
+      name: this.name,
+      option: this.option
+    }
   }
 }
 
@@ -88,9 +101,22 @@ class API extends Runner {
   }
 
   callback (req, res) {
-    res.setHeader('content-type', 'text/plain')
-    res.writeHead(200)
-    res.end(`${this.command.run(API.options(req))}\n`)
+    try {
+      var body = `${this.command.run(API.options(req))}\n`
+      res.setHeader('content-type', 'text/plain')
+      res.writeHead(200)
+      res.end(body)
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        body = JSON.stringify(e.toJSON())
+        res.setHeader('content-type', 'application/json')
+        res.writeHead(403)
+      } else {
+        throw e
+      }
+    } finally {
+      res.end(body)
+    }
   }
 
   close () {
