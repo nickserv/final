@@ -307,20 +307,53 @@ describe('final', () => {
     })
 
     describe('#run()', () => {
-      context('without the help flag', () => {
-        it('runs a cli for the given command that prints a result', sinon.test(function () {
-          this.stub(console, 'log')
-          cli.run()
+      // Sets up stubs for tests that would produce console output. This can't
+      // be in a beforeEach() hook because the console stubs would hide mocha's
+      // command line results.
+      function setup (sandbox) {
+        sandbox.stub(cli, 'help')
+        sandbox.stub(console, 'error')
+        sandbox.stub(console, 'log')
+        cli.run()
+      }
 
+      context('given valid options', () => {
+        it('runs a cli for the given command that prints a result', sinon.test(function () {
+          setup(this)
+          sinon.assert.notCalled(cli.help)
+          sinon.assert.notCalled(console.error)
           sinon.assert.calledOnce(console.log)
           sinon.assert.calledWithExactly(console.log, '3')
         }))
       })
 
-      context('with the help flag', () => {
+      function itDisplaysHelp () {
+        it('displays help', sinon.test(function () {
+          setup(this)
+          sinon.assert.calledOnce(cli.help)
+          sinon.assert.calledWithExactly(cli.help)
+        }))
+      }
+
+      context('given invalid options', () => {
+        before(() => { args = 'node cli.js --invalid' })
+
+        it('displays validation errors and help', sinon.test(function () {
+          setup(this)
+          var expected = 'Error: Missing required option "first"\n' +
+                         'Error: Invalid option "invalid"'
+          sinon.assert.calledOnce(console.error)
+          sinon.assert.calledWithExactly(console.error, expected)
+          sinon.assert.called(console.log)
+        }))
+
+        itDisplaysHelp()
+      })
+
+      context('given the help flag', () => {
         before(() => { args = 'node cli.js --help' })
 
-        it('runs a cli for the given command that prints usage information')
+        itDisplaysHelp()
       })
     })
   })

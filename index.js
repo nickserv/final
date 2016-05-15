@@ -12,10 +12,18 @@ class ValidationError extends Error {
     this.optionErrors = optionErrors
   }
 
+  mapOptionErrors (callback) {
+    return Array.from(this.optionErrors.values()).map(callback)
+  }
+
   toJSON () {
     return {
-      errors: Array.from(this.optionErrors.values()).map((e) => e.toJSON())
+      errors: this.mapOptionErrors((e) => e.toJSON())
     }
+  }
+
+  toText () {
+    return this.mapOptionErrors((e) => e.toText()).join('\n')
   }
 }
 
@@ -39,12 +47,20 @@ class InvalidOptionError extends OptionError {
     super(option)
     this.name = 'InvalidOptionError'
   }
+
+  toText () {
+    return `Error: Invalid option "${this.option}"`
+  }
 }
 
 class MissingOptionError extends OptionError {
   constructor (option) {
     super(option)
     this.name = 'MissingOptionError'
+  }
+
+  toText () {
+    return `Error: Missing required option "${this.option}"`
   }
 }
 
@@ -164,7 +180,17 @@ class CLI extends Runner {
 
   run () {
     var options = CLI.options()
-    console.log(options.help ? this.help() : this.command.run(options))
+    try {
+      console.log(options.help ? this.help() : this.command.run(options))
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        console.error(e.toText())
+        console.log()
+        console.log(this.help())
+      } else {
+        throw e
+      }
+    }
   }
 }
 
