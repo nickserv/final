@@ -31,11 +31,13 @@ describe('final', () => {
   var options = { first: 1, second: 2 }
   var stringOptions = _.mapValues(options, String)
 
-  describe('Command', () => {
-    var greeting = 'Hello, world!'
-    var simpleCommandCore = () => greeting
-    var simpleCommand = new final.Command(simpleCommandCore)
+  var greeting = 'Hello, world!'
+  var simpleCommandCore = () => greeting
+  var simpleCommand = new final.Command(simpleCommandCore)
 
+  var group = new final.CommandGroup({ add: command, greet: simpleCommand })
+
+  describe('Command', () => {
     describe('constructor', () => {
       context('for a command without options', () => {
         it('uses the given core', () => {
@@ -193,13 +195,71 @@ describe('final', () => {
   })
 
   describe('CommandGroup', () => {
-    it('has tests')
+    describe('constructor', () => {
+      it('uses the given commands', () => {
+        assert.strictEqual(group.commands.add, command)
+        assert.strictEqual(group.commands.greet, simpleCommand)
+      })
+    })
+
+    describe('#run()', () => {
+      var path
+      var sandbox
+
+      beforeEach(() => {
+        sandbox = sinon.sandbox.create()
+        sandbox.stub(command, 'run')
+        sandbox.stub(simpleCommand, 'run')
+
+        group.run({ _path: path })
+      })
+
+      afterEach(() => sandbox.restore())
+
+      context('given an empty path', () => {
+        before(() => { path = [] })
+
+        it('throws an error')
+      })
+
+      context('given a path for the first command', () => {
+        before(() => { path = ['add'] })
+
+        it('runs the first command', () => {
+          assert.calledOnce(command.run)
+          assert.notCalled(simpleCommand.run)
+        })
+      })
+
+      context('given a path for the second command', () => {
+        before(() => { path = ['greet'] })
+
+        it('runs the second command', () => {
+          assert.notCalled(command.run)
+          assert.calledOnce(simpleCommand.run)
+        })
+      })
+
+      context('given a path for an invalid command', () => {
+        before(() => { path = ['invalid'] })
+
+        it('throws an error')
+      })
+    })
   })
 
   describe('Runner', () => {
     describe('constructor', () => {
-      it('uses the given command', () => {
-        assert.strictEqual(new final.Runner(command).command, command)
+      context('given a command', () => {
+        it('uses the given command', () => {
+          assert.strictEqual(new final.Runner(command).command, command)
+        })
+      })
+
+      context('given a group', () => {
+        it('uses the given group', () => {
+          assert.strictEqual(new final.Runner(group).command, group)
+        })
       })
     })
 
