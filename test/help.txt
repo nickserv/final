@@ -1,0 +1,10 @@
+Usage: cli <required> [optional]
+
+Required:
+
+  --first              first number to add
+
+Optional:
+
+  --help               output usage information
+  --second             second number to add
