@@ -91,21 +91,21 @@ describe('final', () => {
       })
     })
 
-    describe('#run()', () => {
+    describe('#runCommand()', () => {
       var res
 
-      function run (done) {
-        api.run()
+      function runCommand (done) {
+        api.runCommand()
         http.get(req.url, (thisRes) => {
           res = thisRes
           done()
         }).on('error', done)
       }
 
-      it('runs its server for the given command', run)
+      it('runs its server for the given command', runCommand)
 
       describe('response', () => {
-        before(run)
+        before(runCommand)
 
         it('has a 200 status code', () => {
           assert.strictEqual(res.statusCode, 200)
