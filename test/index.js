@@ -1,4 +1,4 @@
-/* global after, before, beforeEach, context, describe, it */
+/* eslint-env node, es6, mocha */
 'use strict'
 var _ = require('lodash')
 var assert = require('assert')
