@@ -1,3 +1,4 @@
+/* global after, before, beforeEach, context, describe, it */
 'use strict'
 var _ = require('lodash')
 var assert = require('assert')
