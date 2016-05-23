@@ -194,4 +194,4 @@ class CLI extends Runner {
   }
 }
 
-module.exports = { InvalidOptionError, MissingOptionError, ValidationError, Command, Runner, API, CLI }
+module.exports = { OptionError, InvalidOptionError, MissingOptionError, ValidationError, Command, Runner, API, CLI }
