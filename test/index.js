@@ -32,6 +32,34 @@ describe('final', () => {
   var options = { first: 1, second: 2 }
   var stringOptions = _.mapValues(options, String)
 
+  describe('ValidationError', () => {
+    describe('constructor', it)
+
+    describe('#mapOptionErrors()', it)
+
+    describe('#toJSON()', it)
+
+    describe('#toText()', it)
+  })
+
+  describe('OptionError', () => {
+    describe('constructor', it)
+
+    describe('#toJSON()', it)
+  })
+
+  describe('InvalidOptionError', () => {
+    describe('constructor', it)
+
+    describe('#toText()', it)
+  })
+
+  describe('MissingOptionError', () => {
+    describe('constructor', it)
+
+    describe('#toText()', it)
+  })
+
   describe('Command', () => {
     var greeting = 'Hello, world!'
     var simpleCommandCore = () => greeting
@@ -58,6 +86,12 @@ describe('final', () => {
         })
       })
     })
+
+    describe('#createErrors()', it)
+
+    describe('#difference()', it)
+
+    describe('#getOptionNames()', it)
 
     describe('#run()', () => {
       context('for a command without options', () => {
@@ -216,16 +250,6 @@ describe('final', () => {
       })
     })
 
-    describe('#callback()', () => {
-      it('is a function', () => {
-        assert(api.callback instanceof Function)
-      })
-
-      it('takes a request and a response', () => {
-        assert.strictEqual(api.callback.length, 2)
-      })
-    })
-
     describe('#server', () => {
       context('given valid options', () => {
         it('responds with a result', (done) => {
@@ -256,6 +280,16 @@ describe('final', () => {
             .expect('content-type', 'application/json')
             .end(done)
         })
+      })
+    })
+
+    describe('#callback()', () => {
+      it('is a function', () => {
+        assert(api.callback instanceof Function)
+      })
+
+      it('takes a request and a response', () => {
+        assert.strictEqual(api.callback.length, 2)
       })
     })
 
@@ -294,6 +328,8 @@ describe('final', () => {
 
     before(() => { args = 'node cli.js --first 1 --second 2' })
     beforeEach(() => { process.argv = args.split(' ') })
+
+    describe('#formatOptions()', it)
 
     describe('#help()', () => {
       it('returns formatted help text', () => {
