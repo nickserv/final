@@ -1,4 +1,3 @@
-/* eslint-env node, es6 */
 'use strict'
 var _ = require('lodash')
 var http = require('http')

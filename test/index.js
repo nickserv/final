@@ -1,4 +1,4 @@
-/* eslint-env node, es6, mocha */
+/* eslint-env mocha */
 'use strict'
 var _ = require('lodash')
 var assert = require('assert')
