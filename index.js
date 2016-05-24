@@ -5,6 +5,11 @@ var minimist = require('minimist')
 var path = require('path')
 var url = require('url')
 
+var setHelper = {
+  difference: (a, b) => new Set(_.difference(Array.from(a), Array.from(b))),
+  keys: (object) => new Set(_.keys(object))
+}
+
 class ValidationError extends Error {
   constructor (optionErrors) {
     super()
@@ -68,34 +73,26 @@ class Command {
   constructor (core, options) {
     this.core = core
     this.options = options
-    this.requiredOptionNames = Command.getOptionNames(_.pickBy(this.options, 'required'))
-    this.optionNames = Command.getOptionNames(this.options)
+    this.requiredOptionNames = setHelper.keys(_.pickBy(this.options, 'required'))
+    this.optionNames = setHelper.keys(this.options)
   }
 
   static createErrors (OptionErrorClass, optionNames) {
     return Array.from(optionNames).map((optionName) => new OptionErrorClass(optionName))
   }
 
-  static difference (a, b) {
-    return new Set(Array.from(a).filter((x) => !b.has(x)))
-  }
-
-  static getOptionNames (options) {
-    return new Set(_.keys(options))
-  }
-
   run (options) {
-    var optionErrors = this.validate(Command.getOptionNames(options))
+    var optionErrors = this.validate(setHelper.keys(options))
     if (optionErrors.size) throw new ValidationError(optionErrors)
 
     return String(this.core(_.mapValues(options, String)))
   }
 
   validate (optionNames) {
-    if (!this.options) return new Set([])
+    if (!this.options) return new Set()
 
-    var missingOptions = Command.difference(this.requiredOptionNames, optionNames)
-    var invalidOptions = Command.difference(optionNames, this.optionNames)
+    var missingOptions = setHelper.difference(this.requiredOptionNames, optionNames)
+    var invalidOptions = setHelper.difference(optionNames, this.optionNames)
 
     return new Set(_.concat(
       Command.createErrors(MissingOptionError, missingOptions),
@@ -194,4 +191,4 @@ class CLI extends Runner {
   }
 }
 
-module.exports = { OptionError, InvalidOptionError, MissingOptionError, ValidationError, Command, Runner, API, CLI }
+module.exports = { setHelper, OptionError, InvalidOptionError, MissingOptionError, ValidationError, Command, Runner, API, CLI }

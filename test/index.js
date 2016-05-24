@@ -37,6 +37,20 @@ describe('final', () => {
   var optionErrors = new Set([invalidOptionError, missingOptionError])
   var validationError = new final.ValidationError(optionErrors)
 
+  describe('setHelper', () => {
+    describe('#difference()', () => {
+      it('returns the difference of two Sets', () => {
+        assert.deepStrictEqual(final.setHelper.difference(new Set([1, 2]), new Set([2, 3])), new Set([1]))
+      })
+    })
+
+    describe('#keys()', () => {
+      it('returns the keys of the given Object', () => {
+        assert.deepStrictEqual(final.setHelper.keys(commandOptions), new Set(['first', 'second']))
+      })
+    })
+  })
+
   describe('ValidationError', () => {
     describe('constructor', () => {
       it('sets name to ValidationError', () => {
@@ -145,18 +159,6 @@ describe('final', () => {
     describe('#createErrors()', () => {
       it('creates errors of the given class for the given options', () => {
         assert.deepStrictEqual(final.Command.createErrors(final.OptionError, ['one', 'two']), [new final.OptionError('one'), new final.OptionError('two')])
-      })
-    })
-
-    describe('#difference()', () => {
-      it('returns the difference of two Sets', () => {
-        assert.deepStrictEqual(final.Command.difference(new Set([1, 2]), new Set([2, 3])), new Set([1]))
-      })
-    })
-
-    describe('#getOptionNames()', () => {
-      it('returns the names of the given options Object', () => {
-        assert.deepStrictEqual(final.Command.getOptionNames(commandOptions), new Set(['first', 'second']))
       })
     })
 
