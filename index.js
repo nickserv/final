@@ -7,7 +7,8 @@ var url = require('url')
 
 var setHelper = {
   difference: (a, b) => new Set(_.difference(Array.from(a), Array.from(b))),
-  keys: (object) => new Set(_.keys(object))
+  keys: (object) => new Set(_.keys(object)),
+  map: (set, callback) => new Set(Array.from(set).map(callback))
 }
 
 class ValidationError extends Error {
@@ -18,7 +19,7 @@ class ValidationError extends Error {
   }
 
   mapOptionErrors (callback) {
-    return Array.from(this.optionErrors.values()).map(callback)
+    return Array.from(setHelper.map(this.optionErrors, callback))
   }
 
   toJSON () {

@@ -49,6 +49,12 @@ describe('final', () => {
         assert.deepStrictEqual(final.setHelper.keys(commandOptions), new Set(['first', 'second']))
       })
     })
+
+    describe('#map()', () => {
+      it('maps over a set', () => {
+        assert.deepStrictEqual(final.setHelper.map(new Set([1, 2]), (n) => n * 2), new Set([2, 4]))
+      })
+    })
   })
 
   describe('ValidationError', () => {
