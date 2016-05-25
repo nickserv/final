@@ -73,8 +73,8 @@ class Command {
     this.optionNames = Command.getOptionNames(this.options)
   }
 
-  static createErrors (ErrorClass, optionNames) {
-    return Array.from(optionNames).map((optionName) => new ErrorClass(optionName))
+  static createErrors (OptionErrorClass, optionNames) {
+    return Array.from(optionNames).map((optionName) => new OptionErrorClass(optionName))
   }
 
   static difference (a, b) {
@@ -236,4 +236,4 @@ class CLI extends Runner {
   }
 }
 
-module.exports = { InvalidOptionError, MissingOptionError, ValidationError, Command, Runner, API, App, CLI }
+module.exports = { OptionError, InvalidOptionError, MissingOptionError, ValidationError, Command, Runner, API, App, CLI }

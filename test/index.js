@@ -1,3 +1,4 @@
+/* eslint-env mocha */
 'use strict'
 var _ = require('lodash')
 var assert = require('assert')
@@ -31,6 +32,89 @@ describe('final', () => {
   var options = { first: 1, second: 2 }
   var stringOptions = _.mapValues(options, String)
 
+  var invalidOptionError = new final.InvalidOptionError('invalid')
+  var missingOptionError = new final.MissingOptionError('missing')
+  var optionErrors = new Set([invalidOptionError, missingOptionError])
+  var validationError = new final.ValidationError(optionErrors)
+
+  describe('ValidationError', () => {
+    describe('constructor', () => {
+      it('sets name to ValidationError', () => {
+        assert.strictEqual(validationError.name, 'ValidationError')
+      })
+
+      it('sets optionErrors', () => {
+        assert.strictEqual(validationError.optionErrors, optionErrors)
+      })
+    })
+
+    describe('#mapOptionErrors()', () => {
+      it('maps over its optionErrors', () => {
+        assert.deepStrictEqual(validationError.mapOptionErrors((e) => e.option), ['invalid', 'missing'])
+      })
+    })
+
+    describe('#toJSON()', () => {
+      it('returns a JSON representation of itself, including its optionErrors, as an Object', () => {
+        assert.deepStrictEqual(validationError.toJSON(), { errors: [{ name: 'InvalidOptionError', option: 'invalid' }, { name: 'MissingOptionError', option: 'missing' }] })
+      })
+    })
+
+    describe('#toText()', () => {
+      it('returns a textual representation of its optionErrors', () => {
+        assert.strictEqual(validationError.toText(), 'Error: Invalid option "invalid"\nError: Missing required option "missing"')
+      })
+    })
+  })
+
+  describe('OptionError', () => {
+    var optionError = new final.OptionError('option')
+
+    describe('constructor', () => {
+      it('sets name to OptionError', () => {
+        assert.strictEqual(optionError.name, 'OptionError')
+      })
+
+      it('sets option', () => {
+        assert.strictEqual(optionError.option, 'option')
+      })
+    })
+
+    describe('#toJSON()', () => {
+      it('returns a JSON representation of the error\'s name and option as an Object', () => {
+        assert.deepStrictEqual(optionError.toJSON(), { name: 'OptionError', option: 'option' })
+      })
+    })
+  })
+
+  describe('InvalidOptionError', () => {
+    describe('constructor', () => {
+      it('sets name to InvalidOptionError', () => {
+        assert.strictEqual(invalidOptionError.name, 'InvalidOptionError')
+      })
+    })
+
+    describe('#toText()', () => {
+      it('returns a textual representation of itself', () => {
+        assert.strictEqual(invalidOptionError.toText(), 'Error: Invalid option "invalid"')
+      })
+    })
+  })
+
+  describe('MissingOptionError', () => {
+    describe('constructor', () => {
+      it('sets name to MissingOptionError', () => {
+        assert.strictEqual(missingOptionError.name, 'MissingOptionError')
+      })
+    })
+
+    describe('#toText()', () => {
+      it('returns a textual representation of itself', () => {
+        assert.strictEqual(missingOptionError.toText(), 'Error: Missing required option "missing"')
+      })
+    })
+  })
+
   describe('Command', () => {
     var greeting = 'Hello, world!'
     var simpleCommandCore = () => greeting
@@ -55,6 +139,24 @@ describe('final', () => {
         it('uses the given options', () => {
           assert.deepStrictEqual(command.options, commandOptions)
         })
+      })
+    })
+
+    describe('#createErrors()', () => {
+      it('creates errors of the given class for the given options', () => {
+        assert.deepStrictEqual(final.Command.createErrors(final.OptionError, ['one', 'two']), [new final.OptionError('one'), new final.OptionError('two')])
+      })
+    })
+
+    describe('#difference()', () => {
+      it('returns the difference of two Sets', () => {
+        assert.deepStrictEqual(final.Command.difference(new Set([1, 2]), new Set([2, 3])), new Set([1]))
+      })
+    })
+
+    describe('#getOptionNames()', () => {
+      it('returns the names of the given options Object', () => {
+        assert.deepStrictEqual(final.Command.getOptionNames(commandOptions), new Set(['first', 'second']))
       })
     })
 
@@ -215,16 +317,6 @@ describe('final', () => {
       })
     })
 
-    describe('#callback()', () => {
-      it('is a function', () => {
-        assert(api.callback instanceof Function)
-      })
-
-      it('takes a request and a response', () => {
-        assert.strictEqual(api.callback.length, 2)
-      })
-    })
-
     describe('#server', () => {
       context('given valid options', () => {
         it('responds with a result', (done) => {
@@ -255,6 +347,16 @@ describe('final', () => {
             .expect('content-type', 'application/json')
             .end(done)
         })
+      })
+    })
+
+    describe('#callback()', () => {
+      it('is a function', () => {
+        assert(api.callback instanceof Function)
+      })
+
+      it('takes a request and a response', () => {
+        assert.strictEqual(api.callback.length, 2)
       })
     })
 
@@ -345,6 +447,12 @@ describe('final', () => {
 
     before(() => { args = 'node cli.js --first 1 --second 2' })
     beforeEach(() => { process.argv = args.split(' ') })
+
+    describe('#formatOptions()', () => {
+      it('formats the given options for usage information', () => {
+        assert.strictEqual(final.CLI.formatOptions(commandOptions), '  --first              first number to add\n  --second             second number to add')
+      })
+    })
 
     describe('#help()', () => {
       it('returns formatted help text', () => {
