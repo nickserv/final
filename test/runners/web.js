@@ -1,39 +1,39 @@
 /* global command, runners */
 var http = require('http')
 
-describe('runners.App', () => {
+describe('runners.Web', () => {
   var indexURL = 'http://localhost:3000/'
   var resultURL = indexURL + 'result?first=1&second=2'
 
-  var app
-  beforeEach(() => { app = new runners.App(command) })
-  afterEach(() => app.close())
+  var web
+  beforeEach(() => { web = new runners.Web(command) })
+  afterEach(() => web.close())
 
   describe('constructor', () => {
-    it('creates a app with a server', () => {
-      app.server.should.be.an.instanceof(http.Server)
+    it('creates a web app with a server', () => {
+      web.server.should.be.an.instanceof(http.Server)
     })
   })
 
   describe('#close()', () => {
-    it('closes the app server', (done) => {
-      app.close()
+    it('closes the web server', (done) => {
+      web.close()
 
       http.get(indexURL, (res) =>
-        done('Error: runners.App server should be closed')
+        done('Error: runners.Web server should be closed')
       ).on('error', () => done())
     })
   })
 
   describe('#createApp()', () => {
     it('returns a new Express app', () => {
-      app.createApp().should.be.an.instanceof(Function)
+      web.createApp().should.be.an.instanceof(Function)
     })
   })
 
   describe('#run()', () => {
-    it('runs an app for the given command', (done) => {
-      app.run()
+    it('runs a web app for the given command', (done) => {
+      web.run()
 
       http.get(indexURL, (res) => {
         res.statusCode.should.equal(200)
