@@ -37,6 +37,10 @@ describe('final', () => {
   var optionErrors = new Set([invalidOptionError, missingOptionError])
   var validationError = new final.ValidationError(optionErrors)
 
+  var sandbox
+  beforeEach(() => { sandbox = sinon.sandbox.create() })
+  afterEach(() => { sandbox.restore() })
+
   describe('ValidationError', () => {
     describe('constructor', () => {
       it('sets name to ValidationError', () => {
@@ -417,19 +421,22 @@ describe('final', () => {
     })
 
     describe('#run()', () => {
+      beforeEach(() => { sandbox.spy(cli, 'help') })
+
       // Sets up stubs for tests that would produce console output. This can't
       // be in a beforeEach() hook because the console stubs would hide mocha's
       // command line results.
-      function setup (sandbox) {
-        sandbox.stub(cli, 'help')
-        sandbox.stub(console, 'error')
-        sandbox.stub(console, 'log')
-        cli.run()
+      function stubOutput (callback) {
+        return () => {
+          sandbox.stub(console, 'error')
+          sandbox.stub(console, 'log')
+          cli.run()
+          callback()
+        }
       }
 
       context('given valid options', () => {
-        it('runs a cli for the given command that prints a result', sinon.test(function () {
-          setup(this)
+        it('runs a cli for the given command that prints a result', stubOutput(() => {
           assert.notCalled(cli.help)
           assert.notCalled(console.error)
           assert.calledOnce(console.log)
@@ -438,8 +445,7 @@ describe('final', () => {
       })
 
       function itDisplaysHelp () {
-        it('displays help', sinon.test(function () {
-          setup(this)
+        it('displays help', stubOutput(() => {
           assert.calledOnce(cli.help)
           assert.calledWithExactly(cli.help)
         }))
@@ -448,8 +454,7 @@ describe('final', () => {
       context('given invalid options', () => {
         before(() => { args = 'node cli.js --invalid' })
 
-        it('displays validation errors and help', sinon.test(function () {
-          setup(this)
+        it('displays validation errors and help', stubOutput(() => {
           var expected = 'Error: Missing required option "first"\n' +
                          'Error: Invalid option "invalid"'
           assert.calledOnce(console.error)
