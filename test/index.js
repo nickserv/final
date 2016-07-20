@@ -12,9 +12,10 @@ var sinon = require('sinon')
 var sinonChai = require('sinon-chai')
 var url = require('url')
 
+Object.assign(global, final)
+
 var should = chai.should()
 chai.use(sinonChai)
-Object.assign(global, final)
 
 describe('final', () => {
   var commandCore = (options) => {
@@ -325,16 +326,6 @@ describe('final', () => {
       })
     })
 
-    describe('#callback()', () => {
-      it('is a function', () => {
-        api.callback.should.be.a('function')
-      })
-
-      it('takes a request and a response', () => {
-        api.callback.should.have.length(2)
-      })
-    })
-
     describe('#server', () => {
       context('given valid options', () => {
         it('responds with a result', (done) => {
@@ -450,7 +441,7 @@ describe('final', () => {
       }
 
       context('given valid options', () => {
-        it('runs a cli for the given command that prints a result', stubOutput(function () {
+        it('runs a cli for the given command that prints a result', stubOutput(() => {
           cli.help.should.not.have.been.called
           console.error.should.not.have.been.called
           console.log.should.have.been.calledOnce
@@ -459,7 +450,7 @@ describe('final', () => {
       })
 
       function itDisplaysHelp () {
-        it('displays help', stubOutput(function () {
+        it('displays help', stubOutput(() => {
           cli.help.should.have.been.calledOnce
           cli.help.should.have.been.calledWithExactly()
         }))
