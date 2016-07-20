@@ -1,3 +1,5 @@
+/* eslint-env mocha */
+/* global Command, ValidationError, OptionError, MissingOptionError, InvalidOptionError, Runner, API, CLI */
 'use strict'
 var _ = require('lodash')
 var chai = require('chai')
@@ -12,6 +14,7 @@ var url = require('url')
 
 var expect = chai.expect
 chai.use(sinonChai)
+Object.assign(global, final)
 
 describe('final', () => {
   var commandCore = (options) => {
@@ -28,15 +31,102 @@ describe('final', () => {
     }
   }
 
-  var command = new final.Command(commandCore, commandOptions)
+  var command = new Command(commandCore, commandOptions)
 
   var options = { first: 1, second: 2 }
   var stringOptions = _.mapValues(options, String)
 
+  var invalidOptionError = new InvalidOptionError('invalid')
+  var missingOptionError = new MissingOptionError('missing')
+  var optionErrors = new Set([invalidOptionError, missingOptionError])
+  var validationError = new ValidationError(optionErrors)
+
+  var sandbox
+  beforeEach(() => { sandbox = sinon.sandbox.create() })
+  afterEach(() => { sandbox.restore() })
+
+  describe('ValidationError', () => {
+    describe('constructor', () => {
+      it('sets name to ValidationError', () => {
+        expect(validationError.name).to.equal('ValidationError')
+      })
+
+      it('sets optionErrors', () => {
+        expect(validationError.optionErrors).to.equal(optionErrors)
+      })
+    })
+
+    describe('#mapOptionErrors()', () => {
+      it('maps over its optionErrors', () => {
+        expect(validationError.mapOptionErrors((e) => e.option)).to.deep.equal(['invalid', 'missing'])
+      })
+    })
+
+    describe('#toJSON()', () => {
+      it('returns a JSON representation of itself, including its optionErrors, as an Object', () => {
+        expect(validationError.toJSON()).to.deep.equal({ errors: [{ name: 'InvalidOptionError', option: 'invalid' }, { name: 'MissingOptionError', option: 'missing' }] })
+      })
+    })
+
+    describe('#toText()', () => {
+      it('returns a textual representation of its optionErrors', () => {
+        expect(validationError.toText()).to.equal('Error: Invalid option "invalid"\nError: Missing required option "missing"')
+      })
+    })
+  })
+
+  describe('OptionError', () => {
+    var optionError = new OptionError('option')
+
+    describe('constructor', () => {
+      it('sets name to OptionError', () => {
+        expect(optionError.name).to.equal('OptionError')
+      })
+
+      it('sets option', () => {
+        expect(optionError.option).to.equal('option')
+      })
+    })
+
+    describe('#toJSON()', () => {
+      it('returns a JSON representation of the error\'s name and option as an Object', () => {
+        expect(optionError.toJSON()).to.deep.equal({ name: 'OptionError', option: 'option' })
+      })
+    })
+  })
+
+  describe('InvalidOptionError', () => {
+    describe('constructor', () => {
+      it('sets name to InvalidOptionError', () => {
+        expect(invalidOptionError.name).to.equal('InvalidOptionError')
+      })
+    })
+
+    describe('#toText()', () => {
+      it('returns a textual representation of itself', () => {
+        expect(invalidOptionError.toText()).to.equal('Error: Invalid option "invalid"')
+      })
+    })
+  })
+
+  describe('MissingOptionError', () => {
+    describe('constructor', () => {
+      it('sets name to MissingOptionError', () => {
+        expect(missingOptionError.name).to.equal('MissingOptionError')
+      })
+    })
+
+    describe('#toText()', () => {
+      it('returns a textual representation of itself', () => {
+        expect(missingOptionError.toText()).to.equal('Error: Missing required option "missing"')
+      })
+    })
+  })
+
   describe('Command', () => {
     var greeting = 'Hello, world!'
     var simpleCommandCore = () => greeting
-    var simpleCommand = new final.Command(simpleCommandCore)
+    var simpleCommand = new Command(simpleCommandCore)
 
     describe('constructor', () => {
       context('for a command without options', () => {
@@ -60,6 +150,24 @@ describe('final', () => {
       })
     })
 
+    describe('#createErrors()', () => {
+      it('creates errors of the given class for the given options', () => {
+        expect(Command.createErrors(OptionError, ['one', 'two'])).to.deep.equal([new OptionError('one'), new OptionError('two')])
+      })
+    })
+
+    describe('#difference()', () => {
+      it('returns the difference of two Sets', () => {
+        expect(Command.difference(new Set([1, 2]), new Set([2, 3]))).to.deep.equal(new Set([1]))
+      })
+    })
+
+    describe('#getOptionNames()', () => {
+      it('returns the names of the given options Object', () => {
+        expect(Command.getOptionNames(commandOptions)).to.deep.equal(new Set(['first', 'second']))
+      })
+    })
+
     describe('#run()', () => {
       context('for a command without options', () => {
         context('given empty options', () => {
@@ -78,7 +186,7 @@ describe('final', () => {
       context('for a command with required and optional options', () => {
         context('given empty options', () => {
           it('throws a ValidationError', () => {
-            expect(() => command.run({})).to.throw(final.ValidationError)
+            expect(() => command.run({})).to.throw(ValidationError)
           })
         })
 
@@ -92,7 +200,7 @@ describe('final', () => {
           it('throws a ValidationError', () => {
             expect(
               () => command.run({ second: 2 })
-            ).to.throw(final.ValidationError)
+            ).to.throw(ValidationError)
           })
         })
 
@@ -106,7 +214,7 @@ describe('final', () => {
           it('throws a ValidationError', () => {
             expect(
               () => command.run({ first: 1, invalid: true })
-            ).to.throw(final.ValidationError)
+            ).to.throw(ValidationError)
           })
         })
       })
@@ -136,7 +244,7 @@ describe('final', () => {
         context('given no options', () => {
           it('returns a MissingOptionError', () => {
             expectValidationErrors(command, [], [
-              new final.MissingOptionError('first')
+              new MissingOptionError('first')
             ])
           })
         })
@@ -150,7 +258,7 @@ describe('final', () => {
         context('given the optional option', () => {
           it('returns a MissingOptionError', () => {
             expectValidationErrors(command, ['second'], [
-              new final.MissingOptionError('first')
+              new MissingOptionError('first')
             ])
           })
         })
@@ -158,8 +266,8 @@ describe('final', () => {
         context('given an invalid option', () => {
           it('returns a MissingOptionError and an InvalidOptionError', () => {
             expectValidationErrors(command, ['invalid'], [
-              new final.MissingOptionError('first'),
-              new final.InvalidOptionError('invalid')
+              new MissingOptionError('first'),
+              new InvalidOptionError('invalid')
             ])
           })
         })
@@ -173,7 +281,7 @@ describe('final', () => {
         context('given the required option and an invalid option', () => {
           it('returns an InvalidOptionError', () => {
             expectValidationErrors(command, ['first', 'invalid'], [
-              new final.InvalidOptionError('invalid')
+              new InvalidOptionError('invalid')
             ])
           })
         })
@@ -181,8 +289,8 @@ describe('final', () => {
         context('given the optional option and an invalid option', () => {
           it('returns a MissingOptionError and an InvalidOptionError', () => {
             expectValidationErrors(command, ['second', 'invalid'], [
-              new final.MissingOptionError('first'),
-              new final.InvalidOptionError('invalid')
+              new MissingOptionError('first'),
+              new InvalidOptionError('invalid')
             ])
           })
         })
@@ -190,7 +298,7 @@ describe('final', () => {
         context('given the required option, the optional option, and an invalid option', () => {
           it('returns an InvalidOptionError', () => {
             expectValidationErrors(command, ['first', 'second', 'invalid'], [
-              new final.InvalidOptionError('invalid')
+              new InvalidOptionError('invalid')
             ])
           })
         })
@@ -201,13 +309,13 @@ describe('final', () => {
   describe('Runner', () => {
     describe('constructor', () => {
       it('uses the given command', () => {
-        expect(new final.Runner(command).command).to.equal(command)
+        expect(new Runner(command).command).to.equal(command)
       })
     })
   })
 
   describe('API', () => {
-    var api = new final.API(command)
+    var api = new API(command)
 
     var req = new http.IncomingMessage()
     req.url = 'http://localhost:3000?first=1&second=2'
@@ -264,6 +372,16 @@ describe('final', () => {
       })
     })
 
+    describe('#callback()', () => {
+      it('is a function', () => {
+        expect(api.callback instanceof Function).to.be.true
+      })
+
+      it('takes a request and a response', () => {
+        expect(api.callback.length).to.equal(2)
+      })
+    })
+
     describe('#close()', () => {
       it('closes the server', (done) => {
         api.close()
@@ -278,7 +396,7 @@ describe('final', () => {
 
     describe('.options()', () => {
       it('returns options from the given request', () => {
-        expect(final.API.options(req)).to.deep.equal(stringOptions)
+        expect(API.options(req)).to.deep.equal(stringOptions)
       })
     })
 
@@ -295,10 +413,16 @@ describe('final', () => {
 
   describe('CLI', () => {
     var args
-    var cli = new final.CLI(command)
+    var cli = new CLI(command)
 
     before(() => { args = 'node cli.js --first 1 --second 2' })
     beforeEach(() => { process.argv = args.split(' ') })
+
+    describe('#formatOptions()', () => {
+      it('formats the given options for usage information', () => {
+        expect(CLI.formatOptions(commandOptions)).to.equal('  --first              first number to add\n  --second             second number to add')
+      })
+    })
 
     describe('#help()', () => {
       it('returns formatted help text', () => {
@@ -310,24 +434,27 @@ describe('final', () => {
 
     describe('.options()', () => {
       it('returns options from argv', () => {
-        expect(final.CLI.options()).to.deep.equal(options)
+        expect(CLI.options()).to.deep.equal(options)
       })
     })
 
     describe('#run()', () => {
+      beforeEach(() => { sandbox.spy(cli, 'help') })
+
       // Sets up stubs for tests that would produce console output. This can't
       // be in a beforeEach() hook because the console stubs would hide mocha's
       // command line results.
-      function setup (sandbox) {
-        sandbox.stub(cli, 'help')
-        sandbox.stub(console, 'error')
-        sandbox.stub(console, 'log')
-        cli.run()
+      function stubOutput (callback) {
+        return () => {
+          sandbox.stub(console, 'error')
+          sandbox.stub(console, 'log')
+          cli.run()
+          callback()
+        }
       }
 
       context('given valid options', () => {
-        it('runs a cli for the given command that prints a result', sinon.test(function () {
-          setup(this)
+        it('runs a cli for the given command that prints a result', stubOutput(function () {
           expect(cli.help).to.not.have.been.called
           expect(console.error).to.not.have.been.called
           expect(console.log).to.have.been.calledOnce
@@ -336,8 +463,7 @@ describe('final', () => {
       })
 
       function itDisplaysHelp () {
-        it('displays help', sinon.test(function () {
-          setup(this)
+        it('displays help', stubOutput(function () {
           expect(cli.help).to.have.been.calledOnce
           expect(cli.help).to.have.been.calledWithExactly()
         }))
@@ -346,8 +472,7 @@ describe('final', () => {
       context('given invalid options', () => {
         before(() => { args = 'node cli.js --invalid' })
 
-        it('displays validation errors and help', sinon.test(function () {
-          setup(this)
+        it('displays validation errors and help', stubOutput(() => {
           var expected = 'Error: Missing required option "first"\n' +
                          'Error: Invalid option "invalid"'
           expect(console.error).to.have.been.calledOnce

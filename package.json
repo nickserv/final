@@ -44,14 +44,9 @@
     "node": ">= 4.0.0"
   },
   "standard": {
-    "globals": [
-      "after",
-      "afterEach",
-      "before",
-      "beforeEach",
-      "context",
-      "describe",
-      "it"
+    "env": [
+      "es6",
+      "node"
     ]
   }
 }
