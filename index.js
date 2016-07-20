@@ -140,7 +140,10 @@ class API extends Runner {
   }
 
   static options (req) {
-    return url.parse(req.url, true).query
+    var query = url.parse(req.url, true).query
+
+    // Force the result to extend Object.prototype for testing
+    return Object.assign({}, query)
   }
 
   run () {
