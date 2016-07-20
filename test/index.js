@@ -1,4 +1,5 @@
 /* eslint-env mocha */
+/* global Command, ValidationError, OptionError, MissingOptionError, InvalidOptionError, Runner, API, CLI */
 'use strict'
 var _ = require('lodash')
 var assert = require('assert')
@@ -9,6 +10,8 @@ var path = require('path')
 var request = require('supertest')
 var sinon = require('sinon')
 var url = require('url')
+
+Object.assign(global, final)
 
 sinon.assert.expose(assert, { prefix: '' })
 
@@ -27,15 +30,15 @@ describe('final', () => {
     }
   }
 
-  var command = new final.Command(commandCore, commandOptions)
+  var command = new Command(commandCore, commandOptions)
 
   var options = { first: 1, second: 2 }
   var stringOptions = _.mapValues(options, String)
 
-  var invalidOptionError = new final.InvalidOptionError('invalid')
-  var missingOptionError = new final.MissingOptionError('missing')
+  var invalidOptionError = new InvalidOptionError('invalid')
+  var missingOptionError = new MissingOptionError('missing')
   var optionErrors = new Set([invalidOptionError, missingOptionError])
-  var validationError = new final.ValidationError(optionErrors)
+  var validationError = new ValidationError(optionErrors)
 
   var sandbox
   beforeEach(() => { sandbox = sinon.sandbox.create() })
@@ -72,7 +75,7 @@ describe('final', () => {
   })
 
   describe('OptionError', () => {
-    var optionError = new final.OptionError('option')
+    var optionError = new OptionError('option')
 
     describe('constructor', () => {
       it('sets name to OptionError', () => {
@@ -122,7 +125,7 @@ describe('final', () => {
   describe('Command', () => {
     var greeting = 'Hello, world!'
     var simpleCommandCore = () => greeting
-    var simpleCommand = new final.Command(simpleCommandCore)
+    var simpleCommand = new Command(simpleCommandCore)
 
     describe('constructor', () => {
       context('for a command without options', () => {
@@ -148,19 +151,19 @@ describe('final', () => {
 
     describe('#createErrors()', () => {
       it('creates errors of the given class for the given options', () => {
-        assert.deepStrictEqual(final.Command.createErrors(final.OptionError, ['one', 'two']), [new final.OptionError('one'), new final.OptionError('two')])
+        assert.deepStrictEqual(Command.createErrors(OptionError, ['one', 'two']), [new OptionError('one'), new OptionError('two')])
       })
     })
 
     describe('#difference()', () => {
       it('returns the difference of two Sets', () => {
-        assert.deepStrictEqual(final.Command.difference(new Set([1, 2]), new Set([2, 3])), new Set([1]))
+        assert.deepStrictEqual(Command.difference(new Set([1, 2]), new Set([2, 3])), new Set([1]))
       })
     })
 
     describe('#getOptionNames()', () => {
       it('returns the names of the given options Object', () => {
-        assert.deepStrictEqual(final.Command.getOptionNames(commandOptions), new Set(['first', 'second']))
+        assert.deepStrictEqual(Command.getOptionNames(commandOptions), new Set(['first', 'second']))
       })
     })
 
@@ -182,7 +185,7 @@ describe('final', () => {
       context('for a command with required and optional options', () => {
         context('given empty options', () => {
           it('throws a ValidationError', () => {
-            assert.throws(() => command.run({}), final.ValidationError)
+            assert.throws(() => command.run({}), ValidationError)
           })
         })
 
@@ -194,7 +197,7 @@ describe('final', () => {
 
         context('given only the optional option', () => {
           it('throws a ValidationError', () => {
-            assert.throws(() => command.run({ second: 2 }), final.ValidationError)
+            assert.throws(() => command.run({ second: 2 }), ValidationError)
           })
         })
 
@@ -206,7 +209,7 @@ describe('final', () => {
 
         context('given an invalid option', () => {
           it('throws a ValidationError', () => {
-            assert.throws(() => command.run({ first: 1, invalid: true }), final.ValidationError)
+            assert.throws(() => command.run({ first: 1, invalid: true }), ValidationError)
           })
         })
       })
@@ -236,7 +239,7 @@ describe('final', () => {
         context('given no options', () => {
           it('returns a MissingOptionError', () => {
             assertValidationErrors(command, [], [
-              new final.MissingOptionError('first')
+              new MissingOptionError('first')
             ])
           })
         })
@@ -250,7 +253,7 @@ describe('final', () => {
         context('given the optional option', () => {
           it('returns a MissingOptionError', () => {
             assertValidationErrors(command, ['second'], [
-              new final.MissingOptionError('first')
+              new MissingOptionError('first')
             ])
           })
         })
@@ -258,8 +261,8 @@ describe('final', () => {
         context('given an invalid option', () => {
           it('returns a MissingOptionError and an InvalidOptionError', () => {
             assertValidationErrors(command, ['invalid'], [
-              new final.MissingOptionError('first'),
-              new final.InvalidOptionError('invalid')
+              new MissingOptionError('first'),
+              new InvalidOptionError('invalid')
             ])
           })
         })
@@ -273,7 +276,7 @@ describe('final', () => {
         context('given the required option and an invalid option', () => {
           it('returns an InvalidOptionError', () => {
             assertValidationErrors(command, ['first', 'invalid'], [
-              new final.InvalidOptionError('invalid')
+              new InvalidOptionError('invalid')
             ])
           })
         })
@@ -281,8 +284,8 @@ describe('final', () => {
         context('given the optional option and an invalid option', () => {
           it('returns a MissingOptionError and an InvalidOptionError', () => {
             assertValidationErrors(command, ['second', 'invalid'], [
-              new final.MissingOptionError('first'),
-              new final.InvalidOptionError('invalid')
+              new MissingOptionError('first'),
+              new InvalidOptionError('invalid')
             ])
           })
         })
@@ -290,7 +293,7 @@ describe('final', () => {
         context('given the required option, the optional option, and an invalid option', () => {
           it('returns an InvalidOptionError', () => {
             assertValidationErrors(command, ['first', 'second', 'invalid'], [
-              new final.InvalidOptionError('invalid')
+              new InvalidOptionError('invalid')
             ])
           })
         })
@@ -301,13 +304,13 @@ describe('final', () => {
   describe('Runner', () => {
     describe('constructor', () => {
       it('uses the given command', () => {
-        assert.strictEqual(new final.Runner(command).command, command)
+        assert.strictEqual(new Runner(command).command, command)
       })
     })
   })
 
   describe('API', () => {
-    var api = new final.API(command)
+    var api = new API(command)
 
     var req = new http.IncomingMessage()
     req.url = 'http://localhost:3000?first=1&second=2'
@@ -378,7 +381,7 @@ describe('final', () => {
 
     describe('.options()', () => {
       it('returns options from the given request', () => {
-        assert.deepEqual(final.API.options(req), stringOptions)
+        assert.deepEqual(API.options(req), stringOptions)
       })
     })
 
@@ -395,14 +398,14 @@ describe('final', () => {
 
   describe('CLI', () => {
     var args
-    var cli = new final.CLI(command)
+    var cli = new CLI(command)
 
     before(() => { args = 'node cli.js --first 1 --second 2' })
     beforeEach(() => { process.argv = args.split(' ') })
 
     describe('#formatOptions()', () => {
       it('formats the given options for usage information', () => {
-        assert.strictEqual(final.CLI.formatOptions(commandOptions), '  --first              first number to add\n  --second             second number to add')
+        assert.strictEqual(CLI.formatOptions(commandOptions), '  --first              first number to add\n  --second             second number to add')
       })
     })
 
@@ -416,7 +419,7 @@ describe('final', () => {
 
     describe('.options()', () => {
       it('returns options from argv', () => {
-        assert.deepStrictEqual(final.CLI.options(), options)
+        assert.deepStrictEqual(CLI.options(), options)
       })
     })
 
