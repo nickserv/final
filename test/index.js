@@ -12,7 +12,7 @@ var sinon = require('sinon')
 var sinonChai = require('sinon-chai')
 var url = require('url')
 
-var expect = chai.expect
+var should = chai.should()
 chai.use(sinonChai)
 Object.assign(global, final)
 
@@ -48,29 +48,29 @@ describe('final', () => {
   describe('ValidationError', () => {
     describe('constructor', () => {
       it('sets name to ValidationError', () => {
-        expect(validationError.name).to.equal('ValidationError')
+        validationError.name.should.equal('ValidationError')
       })
 
       it('sets optionErrors', () => {
-        expect(validationError.optionErrors).to.equal(optionErrors)
+        validationError.optionErrors.should.equal(optionErrors)
       })
     })
 
     describe('#mapOptionErrors()', () => {
       it('maps over its optionErrors', () => {
-        expect(validationError.mapOptionErrors((e) => e.option)).to.deep.equal(['invalid', 'missing'])
+        validationError.mapOptionErrors((e) => e.option).should.deep.equal(['invalid', 'missing'])
       })
     })
 
     describe('#toJSON()', () => {
       it('returns a JSON representation of itself, including its optionErrors, as an Object', () => {
-        expect(validationError.toJSON()).to.deep.equal({ errors: [{ name: 'InvalidOptionError', option: 'invalid' }, { name: 'MissingOptionError', option: 'missing' }] })
+        validationError.toJSON().should.deep.equal({ errors: [{ name: 'InvalidOptionError', option: 'invalid' }, { name: 'MissingOptionError', option: 'missing' }] })
       })
     })
 
     describe('#toText()', () => {
       it('returns a textual representation of its optionErrors', () => {
-        expect(validationError.toText()).to.equal('Error: Invalid option "invalid"\nError: Missing required option "missing"')
+        validationError.toText().should.equal('Error: Invalid option "invalid"\nError: Missing required option "missing"')
       })
     })
   })
@@ -80,17 +80,17 @@ describe('final', () => {
 
     describe('constructor', () => {
       it('sets name to OptionError', () => {
-        expect(optionError.name).to.equal('OptionError')
+        optionError.name.should.equal('OptionError')
       })
 
       it('sets option', () => {
-        expect(optionError.option).to.equal('option')
+        optionError.option.should.equal('option')
       })
     })
 
     describe('#toJSON()', () => {
       it('returns a JSON representation of the error\'s name and option as an Object', () => {
-        expect(optionError.toJSON()).to.deep.equal({ name: 'OptionError', option: 'option' })
+        optionError.toJSON().should.deep.equal({ name: 'OptionError', option: 'option' })
       })
     })
   })
@@ -98,13 +98,13 @@ describe('final', () => {
   describe('InvalidOptionError', () => {
     describe('constructor', () => {
       it('sets name to InvalidOptionError', () => {
-        expect(invalidOptionError.name).to.equal('InvalidOptionError')
+        invalidOptionError.name.should.equal('InvalidOptionError')
       })
     })
 
     describe('#toText()', () => {
       it('returns a textual representation of itself', () => {
-        expect(invalidOptionError.toText()).to.equal('Error: Invalid option "invalid"')
+        invalidOptionError.toText().should.equal('Error: Invalid option "invalid"')
       })
     })
   })
@@ -112,13 +112,13 @@ describe('final', () => {
   describe('MissingOptionError', () => {
     describe('constructor', () => {
       it('sets name to MissingOptionError', () => {
-        expect(missingOptionError.name).to.equal('MissingOptionError')
+        missingOptionError.name.should.equal('MissingOptionError')
       })
     })
 
     describe('#toText()', () => {
       it('returns a textual representation of itself', () => {
-        expect(missingOptionError.toText()).to.equal('Error: Missing required option "missing"')
+        missingOptionError.toText().should.equal('Error: Missing required option "missing"')
       })
     })
   })
@@ -131,40 +131,40 @@ describe('final', () => {
     describe('constructor', () => {
       context('for a command without options', () => {
         it('uses the given core', () => {
-          expect(simpleCommand.core).to.equal(simpleCommandCore)
+          simpleCommand.core.should.equal(simpleCommandCore)
         })
 
         it('doesn\'t use any options', () => {
-          expect(simpleCommand.options).to.be.undefined
+          should.not.exist(simpleCommand.options)
         })
       })
 
       context('for a command with required and optional options', () => {
         it('uses the given core', () => {
-          expect(command.core).to.equal(commandCore)
+          command.core.should.equal(commandCore)
         })
 
         it('uses the given options', () => {
-          expect(command.options).to.equal(commandOptions)
+          command.options.should.equal(commandOptions)
         })
       })
     })
 
     describe('#createErrors()', () => {
       it('creates errors of the given class for the given options', () => {
-        expect(Command.createErrors(OptionError, ['one', 'two'])).to.deep.equal([new OptionError('one'), new OptionError('two')])
+        Command.createErrors(OptionError, ['one', 'two']).should.deep.equal([new OptionError('one'), new OptionError('two')])
       })
     })
 
     describe('#difference()', () => {
       it('returns the difference of two Sets', () => {
-        expect(Command.difference(new Set([1, 2]), new Set([2, 3]))).to.deep.equal(new Set([1]))
+        Command.difference(new Set([1, 2]), new Set([2, 3])).should.deep.equal(new Set([1]))
       })
     })
 
     describe('#getOptionNames()', () => {
       it('returns the names of the given options Object', () => {
-        expect(Command.getOptionNames(commandOptions)).to.deep.equal(new Set(['first', 'second']))
+        Command.getOptionNames(commandOptions).should.deep.equal(new Set(['first', 'second']))
       })
     })
 
@@ -172,13 +172,13 @@ describe('final', () => {
       context('for a command without options', () => {
         context('given empty options', () => {
           it('returns a String result', () => {
-            expect(simpleCommand.run({})).to.equal(greeting)
+            simpleCommand.run({}).should.equal(greeting)
           })
         })
 
         context('given any option', () => {
           it('returns a String result', () => {
-            expect(simpleCommand.run({ extra: true })).to.equal(greeting)
+            simpleCommand.run({ extra: true }).should.equal(greeting)
           })
         })
       })
@@ -186,35 +186,31 @@ describe('final', () => {
       context('for a command with required and optional options', () => {
         context('given empty options', () => {
           it('throws a ValidationError', () => {
-            expect(() => command.run({})).to.throw(ValidationError)
+            () => command.run({}).should.throw(ValidationError)
           })
         })
 
         context('given only the required option', () => {
           it('returns a String result', () => {
-            expect(command.run({ first: 1 })).to.equal('1')
+            command.run({ first: 1 }).should.equal('1')
           })
         })
 
         context('given only the optional option', () => {
           it('throws a ValidationError', () => {
-            expect(
-              () => command.run({ second: 2 })
-            ).to.throw(ValidationError)
+            () => command.run({ second: 2 }).should.throw(ValidationError)
           })
         })
 
         context('given both options', () => {
           it('returns a String result', () => {
-            expect(command.run(options)).to.equal('3')
+            command.run(options).should.equal('3')
           })
         })
 
         context('given an invalid option', () => {
           it('throws a ValidationError', () => {
-            expect(
-              () => command.run({ first: 1, invalid: true })
-            ).to.throw(ValidationError)
+            () => command.run({ first: 1, invalid: true }).should.throw(ValidationError)
           })
         })
       })
@@ -223,7 +219,7 @@ describe('final', () => {
     describe('#validate()', () => {
       function expectValidationErrors (command, options, expected) {
         var errors = command.validate(new Set(options))
-        expect(errors).to.deep.equal(new Set(expected))
+        errors.should.deep.equal(new Set(expected))
       }
 
       context('for a command with no options', () => {
@@ -309,7 +305,7 @@ describe('final', () => {
   describe('Runner', () => {
     describe('constructor', () => {
       it('uses the given command', () => {
-        expect(new Runner(command).command).to.equal(command)
+        new Runner(command).command.should.equal(command)
       })
     })
   })
@@ -325,17 +321,17 @@ describe('final', () => {
 
     describe('constructor', () => {
       it('creates a server', () => {
-        expect(api.server).to.be.an.instanceof(http.Server)
+        api.server.should.be.an.instanceof(http.Server)
       })
     })
 
     describe('#callback()', () => {
       it('is a function', () => {
-        expect(api.callback).to.be.an.instanceof(Function)
+        api.callback.should.be.an.instanceof(Function)
       })
 
       it('takes a request and a response', () => {
-        expect(api.callback).to.have.length(2)
+        api.callback.should.have.length(2)
       })
     })
 
@@ -374,11 +370,11 @@ describe('final', () => {
 
     describe('#callback()', () => {
       it('is a function', () => {
-        expect(api.callback).to.be.an.instanceof(Function)
+        api.callback.should.be.an.instanceof(Function)
       })
 
       it('takes a request and a response', () => {
-        expect(api.callback.length).to.equal(2)
+        api.callback.length.should.equal(2)
       })
     })
 
@@ -396,7 +392,7 @@ describe('final', () => {
 
     describe('.options()', () => {
       it('returns options from the given request', () => {
-        expect(API.options(req)).to.deep.equal(stringOptions)
+        API.options(req).should.deep.equal(stringOptions)
       })
     })
 
@@ -420,7 +416,7 @@ describe('final', () => {
 
     describe('#formatOptions()', () => {
       it('formats the given options for usage information', () => {
-        expect(CLI.formatOptions(commandOptions)).to.equal('  --first              first number to add\n  --second             second number to add')
+        CLI.formatOptions(commandOptions).should.equal('  --first              first number to add\n  --second             second number to add')
       })
     })
 
@@ -428,13 +424,13 @@ describe('final', () => {
       it('returns formatted help text', () => {
         var helpTextPath = path.join(__dirname, 'help.txt')
         var helpText = fs.readFileSync(helpTextPath, 'utf-8').trim()
-        expect(cli.help()).to.equal(helpText)
+        cli.help().should.equal(helpText)
       })
     })
 
     describe('.options()', () => {
       it('returns options from argv', () => {
-        expect(CLI.options()).to.deep.equal(options)
+        CLI.options().should.deep.equal(options)
       })
     })
 
@@ -455,17 +451,17 @@ describe('final', () => {
 
       context('given valid options', () => {
         it('runs a cli for the given command that prints a result', stubOutput(function () {
-          expect(cli.help).to.not.have.been.called
-          expect(console.error).to.not.have.been.called
-          expect(console.log).to.have.been.calledOnce
-          expect(console.log).to.have.been.calledWithExactly('3')
+          cli.help.should.not.have.been.called
+          console.error.should.not.have.been.called
+          console.log.should.have.been.calledOnce
+          console.log.should.have.been.calledWithExactly('3')
         }))
       })
 
       function itDisplaysHelp () {
         it('displays help', stubOutput(function () {
-          expect(cli.help).to.have.been.calledOnce
-          expect(cli.help).to.have.been.calledWithExactly()
+          cli.help.should.have.been.calledOnce
+          cli.help.should.have.been.calledWithExactly()
         }))
       }
 
@@ -475,9 +471,9 @@ describe('final', () => {
         it('displays validation errors and help', stubOutput(() => {
           var expected = 'Error: Missing required option "first"\n' +
                          'Error: Invalid option "invalid"'
-          expect(console.error).to.have.been.calledOnce
-          expect(console.error).to.have.been.calledWithExactly(expected)
-          expect(console.log).to.have.been.called
+          console.error.should.have.been.calledOnce
+          console.error.should.have.been.calledWithExactly(expected)
+          console.log.should.have.been.called
         }))
 
         itDisplaysHelp()
