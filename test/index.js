@@ -374,7 +374,7 @@ describe('final', () => {
 
     describe('#callback()', () => {
       it('is a function', () => {
-        expect(api.callback instanceof Function).to.be.true
+        expect(api.callback).to.be.an.instanceof(Function)
       })
 
       it('takes a request and a response', () => {
