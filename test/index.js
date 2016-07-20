@@ -327,7 +327,7 @@ describe('final', () => {
 
     describe('#callback()', () => {
       it('is a function', () => {
-        api.callback.should.be.an.instanceof(Function)
+        api.callback.should.be.a('function')
       })
 
       it('takes a request and a response', () => {
@@ -370,11 +370,11 @@ describe('final', () => {
 
     describe('#callback()', () => {
       it('is a function', () => {
-        api.callback.should.be.an.instanceof(Function)
+        api.callback.should.be.a('function')
       })
 
       it('takes a request and a response', () => {
-        api.callback.length.should.equal(2)
+        api.callback.should.have.length(2)
       })
     })
 
