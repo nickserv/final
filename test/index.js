@@ -218,21 +218,16 @@ describe('final', () => {
     })
 
     describe('#validate()', () => {
-      function expectValidationErrors (command, options, expected) {
-        var errors = command.validate(new Set(options))
-        errors.should.deep.equal(new Set(expected))
-      }
-
       context('for a command with no options', () => {
         context('given no options', () => {
           it('returns no errors', () => {
-            expectValidationErrors(simpleCommand, [], [])
+            simpleCommand.validate(new Set()).should.deep.equal(new Set())
           })
         })
 
         context('given an option', () => {
           it('returns no errors', () => {
-            expectValidationErrors(simpleCommand, ['extra'], [])
+            simpleCommand.validate(new Set(['extra'])).should.deep.equal(new Set())
           })
         })
       })
@@ -240,63 +235,63 @@ describe('final', () => {
       context('for a command with a required option and an optional option', () => {
         context('given no options', () => {
           it('returns a MissingOptionError', () => {
-            expectValidationErrors(command, [], [
+            command.validate(new Set()).should.deep.equal(new Set([
               new MissingOptionError('first')
-            ])
+            ]))
           })
         })
 
         context('given the required option', () => {
           it('returns no errors', () => {
-            expectValidationErrors(command, ['first'], [])
+            command.validate(new Set(['first'])).should.deep.equal(new Set())
           })
         })
 
         context('given the optional option', () => {
           it('returns a MissingOptionError', () => {
-            expectValidationErrors(command, ['second'], [
+            command.validate(new Set(['second'])).should.deep.equal(new Set([
               new MissingOptionError('first')
-            ])
+            ]))
           })
         })
 
         context('given an invalid option', () => {
           it('returns a MissingOptionError and an InvalidOptionError', () => {
-            expectValidationErrors(command, ['invalid'], [
+            command.validate(new Set(['invalid'])).should.deep.equal(new Set([
               new MissingOptionError('first'),
               new InvalidOptionError('invalid')
-            ])
+            ]))
           })
         })
 
         context('given the required option and the optional option', () => {
           it('returns no errors', () => {
-            expectValidationErrors(command, ['first', 'second'], [])
+            command.validate(new Set(['first', 'second'])).should.deep.equal(new Set())
           })
         })
 
         context('given the required option and an invalid option', () => {
           it('returns an InvalidOptionError', () => {
-            expectValidationErrors(command, ['first', 'invalid'], [
+            command.validate(new Set(['first', 'invalid'])).should.deep.equal(new Set([
               new InvalidOptionError('invalid')
-            ])
+            ]))
           })
         })
 
         context('given the optional option and an invalid option', () => {
           it('returns a MissingOptionError and an InvalidOptionError', () => {
-            expectValidationErrors(command, ['second', 'invalid'], [
+            command.validate(new Set(['second', 'invalid'])).should.deep.equal(new Set([
               new MissingOptionError('first'),
               new InvalidOptionError('invalid')
-            ])
+            ]))
           })
         })
 
         context('given the required option, the optional option, and an invalid option', () => {
           it('returns an InvalidOptionError', () => {
-            expectValidationErrors(command, ['first', 'second', 'invalid'], [
+            command.validate(new Set(['first', 'second', 'invalid'])).should.deep.equal(new Set([
               new InvalidOptionError('invalid')
-            ])
+            ]))
           })
         })
       })
