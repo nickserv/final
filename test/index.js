@@ -354,16 +354,6 @@ describe('final', () => {
       })
     })
 
-    describe('#callback()', () => {
-      it('is a function', () => {
-        api.callback.should.be.a('function')
-      })
-
-      it('takes a request and a response', () => {
-        api.callback.should.have.length(2)
-      })
-    })
-
     describe('#close()', () => {
       it('closes the server', (done) => {
         api.close()
