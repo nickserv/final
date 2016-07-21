@@ -105,8 +105,12 @@ class Command {
 }
 
 class Runner {
-  constructor (command) {
-    this.command = command
+  constructor (commandOrCore, options) {
+    if (commandOrCore instanceof Command) {
+      this.command = commandOrCore
+    } else {
+      this.command = new Command(commandOrCore, options)
+    }
   }
 }
 
