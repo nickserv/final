@@ -1,5 +1,5 @@
 /* eslint-env mocha */
-/* global Command, ValidationError, OptionError, MissingOptionError, InvalidOptionError, Runner, API, CLI */
+/* global setHelper, Command, ValidationError, OptionError, MissingOptionError, InvalidOptionError, Runner, API, CLI */
 'use strict'
 var _ = require('lodash')
 var chai = require('chai')
