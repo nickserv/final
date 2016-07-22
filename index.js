@@ -103,34 +103,38 @@ class Command {
 }
 
 class Runner {
-  constructor (command) {
-    this.command = command
+  constructor (commandOrCore, options) {
+    if (commandOrCore instanceof Command) {
+      this.command = commandOrCore
+    } else {
+      this.command = new Command(commandOrCore, options)
+    }
   }
 }
 
 class API extends Runner {
   constructor (command) {
     super(command)
-    this.server = http.createServer(this.callback.bind(this))
-  }
 
-  callback (req, res) {
-    try {
-      var body = `${this.command.run(API.options(req))}\n`
-      res.setHeader('content-type', 'text/plain')
-      res.writeHead(200)
-      res.end(body)
-    } catch (e) {
-      if (e instanceof ValidationError) {
-        body = JSON.stringify(e.toJSON())
+    this.server = http.createServer((req, res) => {
+      try {
+        var body = `${this.command.run(API.options(req))}\n`
+        res.setHeader('content-type', 'text/plain')
+        res.writeHead(200)
+      } catch (e) {
         res.setHeader('content-type', 'application/json')
-        res.writeHead(403)
-      } else {
-        throw e
+
+        if (e instanceof ValidationError) {
+          body = JSON.stringify(e.toJSON())
+          res.writeHead(403)
+        } else {
+          body = null
+          res.writeHead(500)
+        }
+      } finally {
+        res.end(body)
       }
-    } finally {
-      res.end(body)
-    }
+    })
   }
 
   close () {
@@ -138,7 +142,10 @@ class API extends Runner {
   }
 
   static options (req) {
-    return url.parse(req.url, true).query
+    var query = url.parse(req.url, true).query
+
+    // Force the result to extend Object.prototype for testing
+    return Object.assign({}, query)
   }
 
   run () {
