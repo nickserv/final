@@ -33,6 +33,7 @@ describe('final', () => {
   }
 
   var command = new Command(commandCore, commandOptions)
+  var erroringCommand = new Command(() => { throw new Error() })
 
   var options = { first: 1, second: 2 }
   var stringOptions = _.mapValues(options, String)
@@ -187,7 +188,7 @@ describe('final', () => {
       context('for a command with required and optional options', () => {
         context('given empty options', () => {
           it('throws a ValidationError', () => {
-            () => command.run({}).should.throw(ValidationError)
+            (() => command.run({})).should.throw(ValidationError)
           })
         })
 
@@ -199,7 +200,7 @@ describe('final', () => {
 
         context('given only the optional option', () => {
           it('throws a ValidationError', () => {
-            () => command.run({ second: 2 }).should.throw(ValidationError)
+            (() => command.run({ second: 2 })).should.throw(ValidationError)
           })
         })
 
@@ -211,7 +212,7 @@ describe('final', () => {
 
         context('given an invalid option', () => {
           it('throws a ValidationError', () => {
-            () => command.run({ first: 1, invalid: true }).should.throw(ValidationError)
+            (() => command.run({ first: 1, invalid: true })).should.throw(ValidationError)
           })
         })
       })
@@ -324,13 +325,13 @@ describe('final', () => {
   })
 
   describe('API', () => {
-    var api = new API(command)
+    var api
+    beforeEach(() => { api = new API(command) })
+    afterEach(() => api.close())
 
     var req = new http.IncomingMessage()
     req.url = 'http://localhost:3000?first=1&second=2'
     var parsedReq = url.parse(req.url)
-
-    after(() => api.close())
 
     describe('constructor', () => {
       it('creates a server', () => {
@@ -365,6 +366,20 @@ describe('final', () => {
                 }
               ]
             })
+            .expect('content-type', 'application/json')
+            .end(done)
+        })
+      })
+
+      context('with a failing command', () => {
+        beforeEach(() => { api = new API(erroringCommand) })
+
+        it('responds with an internal server error', (done) => {
+          api.command.should.equal(erroringCommand)
+
+          request(api.server)
+            .get('')
+            .expect(500, '')
             .expect('content-type', 'application/json')
             .end(done)
         })
@@ -473,9 +488,25 @@ describe('final', () => {
       })
 
       context('given the help flag', () => {
-        before(() => { args = 'node cli.js --help' })
+        // Note: we need to reset the args after this test or all following
+        // tests will only display help, regardless of options given
+
+        var argsBackup
+
+        before(() => {
+          argsBackup = args
+          args = 'node cli.js --help'
+        })
+
+        after(() => { args = argsBackup })
 
         itDisplaysHelp()
+      })
+
+      context('with a failing command', () => {
+        it('lets the command throw an error', () => {
+          (() => new CLI(erroringCommand).run()).should.throw(Error)
+        })
       })
     })
   })

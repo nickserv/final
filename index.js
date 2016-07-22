@@ -123,14 +123,15 @@ class API extends Runner {
         var body = `${this.command.run(API.options(req))}\n`
         res.setHeader('content-type', 'text/plain')
         res.writeHead(200)
-        res.end(body)
       } catch (e) {
+        res.setHeader('content-type', 'application/json')
+
         if (e instanceof ValidationError) {
           body = JSON.stringify(e.toJSON())
-          res.setHeader('content-type', 'application/json')
           res.writeHead(403)
         } else {
-          throw e
+          body = null
+          res.writeHead(500)
         }
       } finally {
         res.end(body)
