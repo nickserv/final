@@ -48,6 +48,12 @@ describe('final', () => {
   afterEach(() => { sandbox.restore() })
 
   describe('setHelper', () => {
+    describe('#concat()', () => {
+      it('concatenates Sets', () => {
+        setHelper.concat(new Set([1, 2]), new Set([3, 4])).should.deep.equal(new Set([1, 2, 3, 4]))
+      })
+    })
+
     describe('#difference()', () => {
       it('returns the difference of two Sets', () => {
         setHelper.difference(new Set([1, 2]), new Set([2, 3])).should.deep.equal(new Set([1]))
@@ -174,7 +180,7 @@ describe('final', () => {
 
     describe('#createErrors()', () => {
       it('creates errors of the given class for the given options', () => {
-        Command.createErrors(OptionError, ['one', 'two']).should.deep.equal([new OptionError('one'), new OptionError('two')])
+        Command.createErrors(OptionError, ['one', 'two']).should.deep.equal(new Set([new OptionError('one'), new OptionError('two')]))
       })
     })
 

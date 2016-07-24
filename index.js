@@ -6,6 +6,7 @@ var path = require('path')
 var url = require('url')
 
 var setHelper = {
+  concat: (a, b) => new Set(_.concat(Array.from(a), Array.from(b))),
   difference: (a, b) => new Set(_.difference(Array.from(a), Array.from(b))),
   keys: (object) => new Set(_.keys(object)),
   map: (set, callback) => new Set(Array.from(set).map(callback))
@@ -79,7 +80,7 @@ class Command {
   }
 
   static createErrors (OptionErrorClass, optionNames) {
-    return Array.from(optionNames).map((optionName) => new OptionErrorClass(optionName))
+    return new Set(Array.from(optionNames).map((optionName) => new OptionErrorClass(optionName)))
   }
 
   run (options) {
@@ -95,10 +96,10 @@ class Command {
     var missingOptions = setHelper.difference(this.requiredOptionNames, optionNames)
     var invalidOptions = setHelper.difference(optionNames, this.optionNames)
 
-    return new Set(_.concat(
+    return setHelper.concat(
       Command.createErrors(MissingOptionError, missingOptions),
       Command.createErrors(InvalidOptionError, invalidOptions)
-    ))
+    )
   }
 }
 
