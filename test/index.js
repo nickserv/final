@@ -1,6 +1,5 @@
 /* eslint-env mocha */
-/* global setHelper, Command, ValidationError, OptionError, MissingOptionError, InvalidOptionError, Runner, API, CLI */
-'use strict'
+/* global setHelper, Command, Runner, runners */
 var _ = require('lodash')
 var chai = require('chai')
 var final = require('..')
@@ -38,10 +37,10 @@ describe('final', () => {
   var options = { first: 1, second: 2 }
   var stringOptions = _.mapValues(options, String)
 
-  var invalidOptionError = new InvalidOptionError('invalid')
-  var missingOptionError = new MissingOptionError('missing')
+  var invalidOptionError = new Command.InvalidOptionError('invalid')
+  var missingOptionError = new Command.MissingOptionError('missing')
   var optionErrors = new Set([invalidOptionError, missingOptionError])
-  var validationError = new ValidationError(optionErrors)
+  var validationError = new Command.ValidationError(optionErrors)
 
   var sandbox
   beforeEach(() => { sandbox = sinon.sandbox.create() })
@@ -104,7 +103,7 @@ describe('final', () => {
   })
 
   describe('OptionError', () => {
-    var optionError = new OptionError('option')
+    var optionError = new Command.OptionError('option')
 
     describe('constructor', () => {
       it('sets name to OptionError', () => {
@@ -180,7 +179,7 @@ describe('final', () => {
 
     describe('#createErrors()', () => {
       it('creates errors of the given class for the given options', () => {
-        Command.createErrors(OptionError, ['one', 'two']).should.deep.equal(new Set([new OptionError('one'), new OptionError('two')]))
+        Command.createErrors(Command.OptionError, ['one', 'two']).should.deep.equal(new Set([new Command.OptionError('one'), new Command.OptionError('two')]))
       })
     })
 
@@ -202,7 +201,7 @@ describe('final', () => {
       context('for a command with required and optional options', () => {
         context('given empty options', () => {
           it('throws a ValidationError', () => {
-            (() => command.run({})).should.throw(ValidationError)
+            (() => command.run({})).should.throw(Command.ValidationError)
           })
         })
 
@@ -214,7 +213,7 @@ describe('final', () => {
 
         context('given only the optional option', () => {
           it('throws a ValidationError', () => {
-            (() => command.run({ second: 2 })).should.throw(ValidationError)
+            (() => command.run({ second: 2 })).should.throw(Command.ValidationError)
           })
         })
 
@@ -226,7 +225,7 @@ describe('final', () => {
 
         context('given an invalid option', () => {
           it('throws a ValidationError', () => {
-            (() => command.run({ first: 1, invalid: true })).should.throw(ValidationError)
+            (() => command.run({ first: 1, invalid: true })).should.throw(Command.ValidationError)
           })
         })
       })
@@ -251,7 +250,7 @@ describe('final', () => {
         context('given no options', () => {
           it('returns a MissingOptionError', () => {
             command.validate(new Set()).should.deep.equal(new Set([
-              new MissingOptionError('first')
+              new Command.MissingOptionError('first')
             ]))
           })
         })
@@ -265,7 +264,7 @@ describe('final', () => {
         context('given the optional option', () => {
           it('returns a MissingOptionError', () => {
             command.validate(new Set(['second'])).should.deep.equal(new Set([
-              new MissingOptionError('first')
+              new Command.MissingOptionError('first')
             ]))
           })
         })
@@ -273,8 +272,8 @@ describe('final', () => {
         context('given an invalid option', () => {
           it('returns a MissingOptionError and an InvalidOptionError', () => {
             command.validate(new Set(['invalid'])).should.deep.equal(new Set([
-              new MissingOptionError('first'),
-              new InvalidOptionError('invalid')
+              new Command.MissingOptionError('first'),
+              new Command.InvalidOptionError('invalid')
             ]))
           })
         })
@@ -288,7 +287,7 @@ describe('final', () => {
         context('given the required option and an invalid option', () => {
           it('returns an InvalidOptionError', () => {
             command.validate(new Set(['first', 'invalid'])).should.deep.equal(new Set([
-              new InvalidOptionError('invalid')
+              new Command.InvalidOptionError('invalid')
             ]))
           })
         })
@@ -296,8 +295,8 @@ describe('final', () => {
         context('given the optional option and an invalid option', () => {
           it('returns a MissingOptionError and an InvalidOptionError', () => {
             command.validate(new Set(['second', 'invalid'])).should.deep.equal(new Set([
-              new MissingOptionError('first'),
-              new InvalidOptionError('invalid')
+              new Command.MissingOptionError('first'),
+              new Command.InvalidOptionError('invalid')
             ]))
           })
         })
@@ -305,7 +304,7 @@ describe('final', () => {
         context('given the required option, the optional option, and an invalid option', () => {
           it('returns an InvalidOptionError', () => {
             command.validate(new Set(['first', 'second', 'invalid'])).should.deep.equal(new Set([
-              new InvalidOptionError('invalid')
+              new Command.InvalidOptionError('invalid')
             ]))
           })
         })
@@ -338,9 +337,9 @@ describe('final', () => {
     })
   })
 
-  describe('API', () => {
+  describe('runners.API', () => {
     var api
-    beforeEach(() => { api = new API(command) })
+    beforeEach(() => { api = new runners.API(command) })
     afterEach(() => api.close())
 
     var req = new http.IncomingMessage()
@@ -386,7 +385,7 @@ describe('final', () => {
       })
 
       context('with a failing command', () => {
-        beforeEach(() => { api = new API(erroringCommand) })
+        beforeEach(() => { api = new runners.API(erroringCommand) })
 
         it('responds with an internal server error', (done) => {
           api.command.should.equal(erroringCommand)
@@ -407,14 +406,14 @@ describe('final', () => {
         request(parsedReq.host)
           .get(parsedReq.path)
           .end((err) => {
-            err ? done() : done('Error: API server should be closed')
+            err ? done() : done('Error: runners.API server should be closed')
           })
       })
     })
 
     describe('.options()', () => {
       it('returns options from the given request', () => {
-        API.options(req).should.deep.equal(stringOptions)
+        runners.API.options(req).should.deep.equal(stringOptions)
       })
     })
 
@@ -429,16 +428,16 @@ describe('final', () => {
     })
   })
 
-  describe('CLI', () => {
+  describe('runners.CLI', () => {
     var args
-    var cli = new CLI(command)
+    var cli = new runners.CLI(command)
 
     before(() => { args = 'node cli.js --first 1 --second 2' })
     beforeEach(() => { process.argv = args.split(' ') })
 
     describe('#formatOptions()', () => {
       it('formats the given options for usage information', () => {
-        CLI.formatOptions(commandOptions).should.equal('  --first              first number to add\n  --second             second number to add')
+        runners.CLI.formatOptions(commandOptions).should.equal('  --first              first number to add\n  --second             second number to add')
       })
     })
 
@@ -452,7 +451,7 @@ describe('final', () => {
 
     describe('.options()', () => {
       it('returns options from argv', () => {
-        CLI.options().should.deep.equal(options)
+        runners.CLI.options().should.deep.equal(options)
       })
     })
 
@@ -519,7 +518,7 @@ describe('final', () => {
 
       context('with a failing command', () => {
         it('lets the command throw an error', () => {
-          (() => new CLI(erroringCommand).run()).should.throw(Error)
+          (() => new runners.CLI(erroringCommand).run()).should.throw(Error)
         })
       })
     })
