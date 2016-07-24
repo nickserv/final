@@ -1,5 +1,5 @@
 /* eslint-env mocha */
-/* global Command, ValidationError, OptionError, MissingOptionError, InvalidOptionError, Runner, API, CLI */
+/* global setHelper, Command, ValidationError, OptionError, MissingOptionError, InvalidOptionError, Runner, API, CLI */
 'use strict'
 var _ = require('lodash')
 var chai = require('chai')
@@ -46,6 +46,32 @@ describe('final', () => {
   var sandbox
   beforeEach(() => { sandbox = sinon.sandbox.create() })
   afterEach(() => { sandbox.restore() })
+
+  describe('setHelper', () => {
+    describe('#concat()', () => {
+      it('concatenates Sets', () => {
+        setHelper.concat(new Set([1, 2]), new Set([3, 4])).should.deep.equal(new Set([1, 2, 3, 4]))
+      })
+    })
+
+    describe('#difference()', () => {
+      it('returns the difference of two Sets', () => {
+        setHelper.difference(new Set([1, 2]), new Set([2, 3])).should.deep.equal(new Set([1]))
+      })
+    })
+
+    describe('#keys()', () => {
+      it('returns the keys of the given Object', () => {
+        setHelper.keys(commandOptions).should.deep.equal(new Set(['first', 'second']))
+      })
+    })
+
+    describe('#map()', () => {
+      it('maps over a set', () => {
+        setHelper.map(new Set([1, 2]), (n) => n * 2).should.deep.equal(new Set([2, 4]))
+      })
+    })
+  })
 
   describe('ValidationError', () => {
     describe('constructor', () => {
@@ -154,19 +180,7 @@ describe('final', () => {
 
     describe('#createErrors()', () => {
       it('creates errors of the given class for the given options', () => {
-        Command.createErrors(OptionError, ['one', 'two']).should.deep.equal([new OptionError('one'), new OptionError('two')])
-      })
-    })
-
-    describe('#difference()', () => {
-      it('returns the difference of two Sets', () => {
-        Command.difference(new Set([1, 2]), new Set([2, 3])).should.deep.equal(new Set([1]))
-      })
-    })
-
-    describe('#getOptionNames()', () => {
-      it('returns the names of the given options Object', () => {
-        Command.getOptionNames(commandOptions).should.deep.equal(new Set(['first', 'second']))
+        Command.createErrors(OptionError, ['one', 'two']).should.deep.equal(new Set([new OptionError('one'), new OptionError('two')]))
       })
     })
 
