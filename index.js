@@ -6,10 +6,21 @@ var path = require('path')
 var url = require('url')
 
 var setHelper = {
-  concat: (a, b) => new Set(_.concat(Array.from(a), Array.from(b))),
-  difference: (a, b) => new Set(_.difference(Array.from(a), Array.from(b))),
-  keys: (object) => new Set(_.keys(object)),
-  map: (set, callback) => new Set(Array.from(set).map(callback))
+  concat (a, b) {
+    return new Set(_.concat(Array.from(a), Array.from(b)))
+  },
+
+  difference (a, b) {
+    return new Set(_.difference(Array.from(a), Array.from(b)))
+  },
+
+  keys (object) {
+    return new Set(_.keys(object))
+  },
+
+  map (set, callback) {
+    return new Set(Array.from(set).map(callback))
+  }
 }
 
 class ValidationError extends Error {
