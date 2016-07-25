@@ -5,6 +5,7 @@ module.exports = {
   runners: {
     API: require('./lib/runners/api'),
     CLI: require('./lib/runners/cli'),
+    ServableRunner: require('./lib/runners/servable_runner'),
     Web: require('./lib/runners/web')
   }
 }

@@ -9,29 +9,7 @@ describe('runners.Web', () => {
   beforeEach(() => { web = new runners.Web(command) })
   afterEach(() => web.close())
 
-  describe('constructor', () => {
-    it('creates a web app with a server', () => {
-      web.server.should.be.an.instanceof(http.Server)
-    })
-  })
-
-  describe('#close()', () => {
-    it('closes the web server', (done) => {
-      web.close()
-
-      http.get(indexURL, (res) =>
-        done('Error: runners.Web server should be closed')
-      ).on('error', () => done())
-    })
-  })
-
-  describe('#createApp()', () => {
-    it('returns a new Express app', () => {
-      web.createApp().should.be.an.instanceof(Function)
-    })
-  })
-
-  describe('#run()', () => {
+  describe('#server', () => {
     it('runs a web app for the given command', (done) => {
       web.run()
 

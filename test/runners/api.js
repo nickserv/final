@@ -1,4 +1,4 @@
-/* global command, erroringCommand, runners, stringOptions */
+/* global command, erroringCommand, runners */
 var http = require('http')
 var request = require('supertest')
 var url = require('url')
@@ -11,12 +11,6 @@ describe('runners.API', () => {
   var req = new http.IncomingMessage()
   req.url = 'http://localhost:3000?first=1&second=2'
   var parsedReq = url.parse(req.url)
-
-  describe('constructor', () => {
-    it('creates a server', () => {
-      api.server.should.be.an.instanceof(http.Server)
-    })
-  })
 
   describe('#server', () => {
     context('given valid options', () => {
@@ -62,34 +56,6 @@ describe('runners.API', () => {
           .expect('content-type', 'application/json')
           .end(done)
       })
-    })
-  })
-
-  describe('#close()', () => {
-    it('closes the server', (done) => {
-      api.close()
-
-      request(parsedReq.host)
-        .get(parsedReq.path)
-        .end((err) => {
-          err ? done() : done('Error: runners.API server should be closed')
-        })
-    })
-  })
-
-  describe('.options()', () => {
-    it('returns options from the given request', () => {
-      runners.API.options(req).should.deep.equal(stringOptions)
-    })
-  })
-
-  describe('#run()', () => {
-    it('runs its server for the given command', (done) => {
-      api.run()
-
-      request(parsedReq.host)
-        .get(parsedReq.path)
-        .end(done)
     })
   })
 })
