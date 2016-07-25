@@ -1,32 +1,24 @@
 /* global command, runners */
-var http = require('http')
+var request = require('supertest')
 
 describe('runners.Web', () => {
-  var indexURL = 'http://localhost:3000/'
-  var resultURL = indexURL + 'result?first=1&second=2'
-
-  var web
-  beforeEach(() => { web = new runners.Web(command) })
-  afterEach(() => web.close())
+  var web = new runners.Web(command)
 
   describe('#server', () => {
-    it('runs a web app for the given command', (done) => {
-      web.run()
+    it('serves /', (done) => {
+      request(web.server)
+        .get('/')
+        .expect(200)
+        .expect('content-type', /text\/html/)
+        .end(done)
+    })
 
-      http.get(indexURL, (res) => {
-        res.statusCode.should.equal(200)
-        res.headers['content-type'].should.include('text/html')
-      }).on('error', done)
-
-      http.get(resultURL, (res) => {
-        res.statusCode.should.equal(200)
-        res.headers['content-type'].should.include('text/html')
-
-        res.on('data', (chunk) => {
-          chunk.toString('utf8').should.include(3)
-          done()
-        })
-      }).on('error', done)
+    it('serves /result', (done) => {
+      request(web.server)
+        .get('/result?first=1&second=2')
+        .expect(200, /3/)
+        .expect('content-type', /text\/html/)
+        .end(done)
     })
   })
 })
