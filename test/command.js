@@ -1,88 +1,88 @@
 /* global Command, command, commandCore, commandOptions, options, should */
-var invalidOptionError = new Command.InvalidOptionError('invalid')
-var missingOptionError = new Command.MissingOptionError('missing')
-var optionErrors = new Set([invalidOptionError, missingOptionError])
-var validationError = new Command.ValidationError(optionErrors)
-
-describe('ValidationError', () => {
-  describe('constructor', () => {
-    it('sets name to ValidationError', () => {
-      validationError.name.should.equal('ValidationError')
-    })
-
-    it('sets optionErrors', () => {
-      validationError.optionErrors.should.equal(optionErrors)
-    })
-  })
-
-  describe('#mapOptionErrors()', () => {
-    it('maps over its optionErrors', () => {
-      validationError.mapOptionErrors((e) => e.option).should.deep.equal(['invalid', 'missing'])
-    })
-  })
-
-  describe('#toJSON()', () => {
-    it('returns a JSON representation of itself, including its optionErrors, as an Object', () => {
-      validationError.toJSON().should.deep.equal({ errors: [{ name: 'InvalidOptionError', option: 'invalid' }, { name: 'MissingOptionError', option: 'missing' }] })
-    })
-  })
-
-  describe('#toText()', () => {
-    it('returns a textual representation of its optionErrors', () => {
-      validationError.toText().should.equal('Error: Invalid option "invalid"\nError: Missing required option "missing"')
-    })
-  })
-})
-
-describe('OptionError', () => {
-  var optionError = new Command.OptionError('option')
-
-  describe('constructor', () => {
-    it('sets name to OptionError', () => {
-      optionError.name.should.equal('OptionError')
-    })
-
-    it('sets option', () => {
-      optionError.option.should.equal('option')
-    })
-  })
-
-  describe('#toJSON()', () => {
-    it('returns a JSON representation of the error\'s name and option as an Object', () => {
-      optionError.toJSON().should.deep.equal({ name: 'OptionError', option: 'option' })
-    })
-  })
-})
-
-describe('InvalidOptionError', () => {
-  describe('constructor', () => {
-    it('sets name to InvalidOptionError', () => {
-      invalidOptionError.name.should.equal('InvalidOptionError')
-    })
-  })
-
-  describe('#toText()', () => {
-    it('returns a textual representation of itself', () => {
-      invalidOptionError.toText().should.equal('Error: Invalid option "invalid"')
-    })
-  })
-})
-
-describe('MissingOptionError', () => {
-  describe('constructor', () => {
-    it('sets name to MissingOptionError', () => {
-      missingOptionError.name.should.equal('MissingOptionError')
-    })
-  })
-
-  describe('#toText()', () => {
-    it('returns a textual representation of itself', () => {
-      missingOptionError.toText().should.equal('Error: Missing required option "missing"')
-    })
-  })
-})
-
 describe('Command', () => {
+  var invalidOptionError = new Command.InvalidOptionError('invalid')
+  var missingOptionError = new Command.MissingOptionError('missing')
+  var optionErrors = new Set([invalidOptionError, missingOptionError])
+  var validationError = new Command.ValidationError(optionErrors)
+
+  describe('.ValidationError', () => {
+    describe('constructor', () => {
+      it('sets name to ValidationError', () => {
+        validationError.name.should.equal('ValidationError')
+      })
+
+      it('sets optionErrors', () => {
+        validationError.optionErrors.should.equal(optionErrors)
+      })
+    })
+
+    describe('#mapOptionErrors()', () => {
+      it('maps over its optionErrors', () => {
+        validationError.mapOptionErrors((e) => e.option).should.deep.equal(['invalid', 'missing'])
+      })
+    })
+
+    describe('#toJSON()', () => {
+      it('returns a JSON representation of itself, including its optionErrors, as an Object', () => {
+        validationError.toJSON().should.deep.equal({ errors: [{ name: 'InvalidOptionError', option: 'invalid' }, { name: 'MissingOptionError', option: 'missing' }] })
+      })
+    })
+
+    describe('#toText()', () => {
+      it('returns a textual representation of its optionErrors', () => {
+        validationError.toText().should.equal('Error: Invalid option "invalid"\nError: Missing required option "missing"')
+      })
+    })
+  })
+
+  describe('.OptionError', () => {
+    var optionError = new Command.OptionError('option')
+
+    describe('constructor', () => {
+      it('sets name to OptionError', () => {
+        optionError.name.should.equal('OptionError')
+      })
+
+      it('sets option', () => {
+        optionError.option.should.equal('option')
+      })
+    })
+
+    describe('#toJSON()', () => {
+      it('returns a JSON representation of the error\'s name and option as an Object', () => {
+        optionError.toJSON().should.deep.equal({ name: 'OptionError', option: 'option' })
+      })
+    })
+  })
+
+  describe('.InvalidOptionError', () => {
+    describe('constructor', () => {
+      it('sets name to InvalidOptionError', () => {
+        invalidOptionError.name.should.equal('InvalidOptionError')
+      })
+    })
+
+    describe('#toText()', () => {
+      it('returns a textual representation of itself', () => {
+        invalidOptionError.toText().should.equal('Error: Invalid option "invalid"')
+      })
+    })
+  })
+
+  describe('.MissingOptionError', () => {
+    describe('constructor', () => {
+      it('sets name to MissingOptionError', () => {
+        missingOptionError.name.should.equal('MissingOptionError')
+      })
+    })
+
+    describe('#toText()', () => {
+      it('returns a textual representation of itself', () => {
+        missingOptionError.toText().should.equal('Error: Missing required option "missing"')
+      })
+    })
+  })
+
   var greeting = 'Hello, world!'
   var simpleCommandCore = () => greeting
   var simpleCommand = new Command(simpleCommandCore)
