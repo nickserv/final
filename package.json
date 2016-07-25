@@ -46,6 +46,7 @@
   "standard": {
     "env": [
       "es6",
+      "mocha",
       "node"
     ]
   }

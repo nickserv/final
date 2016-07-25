@@ -1,4 +1,3 @@
-/* eslint-env mocha */
 /* global Command, Runner */
 var _ = require('lodash')
 

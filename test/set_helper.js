@@ -1,4 +1,3 @@
-/* eslint-env mocha */
 /* global setHelper */
 
 var commandOptions = {

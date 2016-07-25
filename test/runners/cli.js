@@ -1,4 +1,3 @@
-/* eslint-env mocha */
 /* global Command, runners */
 var _ = require('lodash')
 var fs = require('fs')
