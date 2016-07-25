@@ -1,27 +1,7 @@
-/* global Command, runners */
-var _ = require('lodash')
+/* global command, commandOptions, erroringCommand, options, runners */
 var fs = require('fs')
 var path = require('path')
 var sinon = require('sinon')
-
-var commandCore = (options) => {
-  return _.parseInt(options.first) + (_.parseInt(options.second) || 0)
-}
-
-var commandOptions = {
-  first: {
-    description: 'first number to add',
-    required: true
-  },
-  second: {
-    description: 'second number to add'
-  }
-}
-
-var command = new Command(commandCore, commandOptions)
-var erroringCommand = new Command(() => { throw new Error() })
-
-var options = { first: 1, second: 2 }
 
 describe('runners.CLI', () => {
   var args

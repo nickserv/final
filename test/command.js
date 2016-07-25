@@ -1,24 +1,4 @@
-/* global Command, should */
-var _ = require('lodash')
-
-var commandCore = (options) => {
-  return _.parseInt(options.first) + (_.parseInt(options.second) || 0)
-}
-
-var commandOptions = {
-  first: {
-    description: 'first number to add',
-    required: true
-  },
-  second: {
-    description: 'second number to add'
-  }
-}
-
-var command = new Command(commandCore, commandOptions)
-
-var options = { first: 1, second: 2 }
-
+/* global Command, command, commandCore, commandOptions, options, should */
 var invalidOptionError = new Command.InvalidOptionError('invalid')
 var missingOptionError = new Command.MissingOptionError('missing')
 var optionErrors = new Set([invalidOptionError, missingOptionError])

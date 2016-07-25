@@ -1,15 +1,4 @@
-/* global setHelper */
-
-var commandOptions = {
-  first: {
-    description: 'first number to add',
-    required: true
-  },
-  second: {
-    description: 'second number to add'
-  }
-}
-
+/* global commandOptions, setHelper */
 describe('setHelper', () => {
   describe('#concat()', () => {
     it('concatenates Sets', () => {

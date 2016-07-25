@@ -1,28 +1,7 @@
-/* global Command, runners */
-var _ = require('lodash')
+/* global command, erroringCommand, runners, stringOptions */
 var http = require('http')
 var request = require('supertest')
 var url = require('url')
-
-var commandCore = (options) => {
-  return _.parseInt(options.first) + (_.parseInt(options.second) || 0)
-}
-
-var commandOptions = {
-  first: {
-    description: 'first number to add',
-    required: true
-  },
-  second: {
-    description: 'second number to add'
-  }
-}
-
-var command = new Command(commandCore, commandOptions)
-var erroringCommand = new Command(() => { throw new Error() })
-
-var options = { first: 1, second: 2 }
-var stringOptions = _.mapValues(options, String)
 
 describe('runners.API', () => {
   var api
