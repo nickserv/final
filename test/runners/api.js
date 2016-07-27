@@ -83,9 +83,9 @@ describe('runners.API', () => {
     })
   })
 
-  describe('#run()', () => {
+  describe('#runCommand()', () => {
     it('runs its server for the given command', (done) => {
-      api.run()
+      api.runCommand()
 
       request(parsedReq.host)
         .get(parsedReq.path)

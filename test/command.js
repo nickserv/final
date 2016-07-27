@@ -1,4 +1,4 @@
-/* global Command, command, commandCore, commandOptions, options, should */
+/* global Command, command, commandCore, commandOptions, options, greeting, simpleCommandCore, simpleCommand, should */
 describe('Command', () => {
   var invalidOptionError = new Command.InvalidOptionError('invalid')
   var missingOptionError = new Command.MissingOptionError('missing')
@@ -82,10 +82,6 @@ describe('Command', () => {
       })
     })
   })
-
-  var greeting = 'Hello, world!'
-  var simpleCommandCore = () => greeting
-  var simpleCommand = new Command(simpleCommandCore)
 
   describe('constructor', () => {
     context('for a command without options', () => {
