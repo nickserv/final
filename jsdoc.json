@@ -1,0 +1,15 @@
+{
+  "opts": {
+    "package": "package.json",
+    "readme": "README.md",
+    "recurse": true
+  },
+  "source": {
+    "include": ".",
+    "exclude": [
+      "coverage",
+      "node_modules",
+      "out"
+    ]
+  }
+}
