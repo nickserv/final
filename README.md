@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/nicolasmccurdy/final.png?label=ready&title=Ready)](https://waffle.io/nicolasmccurdy/final)
 # Final
 [![npm version](https://badge.fury.io/js/final.svg)](https://badge.fury.io/js/final)
 [![Build Status](https://travis-ci.org/nicolasmccurdy/final.svg?branch=master)](https://travis-ci.org/nicolasmccurdy/final)
