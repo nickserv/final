@@ -1,11 +1,12 @@
-/* global command, erroringCommand, runners, stringOptions */
+var API = require('../../lib/runners/api')
+var helper = require('../../lib/helper')
 var http = require('http')
 var request = require('supertest')
 var url = require('url')
 
 describe('runners.API', () => {
   var api
-  beforeEach(() => { api = new runners.API(command) })
+  beforeEach(() => { api = new API(helper.command) })
   afterEach(() => api.close())
 
   var req = new http.IncomingMessage()
@@ -13,14 +14,14 @@ describe('runners.API', () => {
   var parsedReq = url.parse(req.url)
 
   describe('constructor', () => {
-    it('creates a server', () => {
-      api.server.should.be.an.instanceof(http.Server)
+    test('creates a server', () => {
+      expect(api.server).toBeInstanceOf(http.Server)
     })
   })
 
   describe('#server', () => {
-    context('given valid options', () => {
-      it('responds with a result', (done) => {
+    describe('given valid options', () => {
+      test('responds with a result', (done) => {
         request(api.server)
           .get(parsedReq.path)
           .expect(200, '3\n')
@@ -29,8 +30,8 @@ describe('runners.API', () => {
       })
     })
 
-    context('given invalid options', () => {
-      it('responds with validation errors', (done) => {
+    describe('given invalid options', () => {
+      test('responds with validation errors', (done) => {
         request(api.server)
           .get('?invalid')
           .expect(403, {
@@ -50,46 +51,43 @@ describe('runners.API', () => {
       })
     })
 
-    context('with a failing command', () => {
-      beforeEach(() => { api = new runners.API(erroringCommand) })
+    describe('with a failing command', () => {
+      beforeEach(() => { api = new API(helper.erroringCommand) })
 
-      it('responds with an internal server error', (done) => {
-        api.command.should.equal(erroringCommand)
+      test('responds with an internal server error', (done) => {
+        expect(api.command).toBe(helper.erroringCommand)
 
         request(api.server)
-          .get('')
-          .expect(500, '')
-          .expect('content-type', 'application/json')
-          .end(done)
+                           .get('')
+                           .expect(500, '')
+                           .expect('content-type', 'application/json')
+                           .end(done)
       })
     })
   })
 
   describe('#close()', () => {
-    it('closes the server', (done) => {
+    test('closes the server', () => {
+      api.run()
+      expect(api.server.listening).toBe(true)
       api.close()
-
-      request(parsedReq.host)
-        .get(parsedReq.path)
-        .end((err) => {
-          err ? done() : done('Error: runners.API server should be closed')
-        })
+      expect(api.server.listening).toBe(false)
     })
   })
 
   describe('.options()', () => {
-    it('returns options from the given request', () => {
-      runners.API.options(req).should.deep.equal(stringOptions)
+    test('returns options from the given request', () => {
+      expect(API.options(req)).toEqual(helper.stringOptions)
     })
   })
 
   describe('#run()', () => {
-    it('runs its server for the given command', (done) => {
+    test('runs its server for the given command', (done) => {
       api.run()
 
       request(parsedReq.host)
-        .get(parsedReq.path)
-        .end(done)
+         .get(parsedReq.path)
+         .end(done)
     })
   })
 })

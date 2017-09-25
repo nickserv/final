@@ -8,18 +8,14 @@
     "minimist": "^1.2.0"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
     "codeclimate-test-reporter": "^0.3.1",
-    "istanbul": "^0.4.3",
-    "mocha": "^2.4.5",
-    "sinon": "^1.17.4",
-    "sinon-chai": "^2.8.0",
-    "standard": "^7.0.1",
+    "jest": "^21.1.0",
+    "standard": "^10.0.3",
     "supertest": "^1.2.0"
   },
   "scripts": {
-    "cover": "istanbul cover _mocha",
-    "lint": "standard",
+    "cover": "jest",
+    "lint": "standard --env jest",
     "test": "npm run lint && npm run cover"
   },
   "repository": {
@@ -41,7 +37,10 @@
     "web"
   ],
   "engines": {
-    "node": ">= 4.0.0"
+    "node": ">= 6.0.0"
+  },
+  "jest": {
+    "collectCoverage": true
   },
   "standard": {
     "env": [

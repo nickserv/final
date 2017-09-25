@@ -48,7 +48,7 @@ result to STDOUT. For example, try putting this in `add.js` and running
 `node add --first 1 --second 2` in the same directory.
 
 ## Installation
-1. Install [Node.js](https://nodejs.org/en/) (version 4 or higher)
+1. Install [Node.js](https://nodejs.org/en/) (version 6 or higher)
 2. `npm install --save final`
 3. `var final = require ('final')`
 
