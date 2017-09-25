@@ -1,4 +1,4 @@
-var Command = require('../lib/Command')
+var Command = require('../lib/command')
 var Runner = require('../lib/runner')
 var helper = require('../lib/helper')
 
